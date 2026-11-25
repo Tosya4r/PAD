@@ -102,13 +102,10 @@ public static class PadDatabase
         db.Database.EnsureCreated();
         if (!ColumnExists(db, "Categories", "Color"))
         {
-            // База старой версии. Пока в ней нет проектов — пересоздаём; иначе данные не трогаем.
-            if (Scalar(db, "SELECT COUNT(*) FROM Projects") > 0)
-                throw new InvalidOperationException("Схема базы устарела, а в ней есть данные. Автоматическое обновление ещё не реализовано.");
-            db.Database.CloseConnection();
-            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
-            db.Database.EnsureDeleted();
-            db.Database.EnsureCreated();
+            // База старой версии: добавляем колонку, данные не трогаем.
+            db.Database.ExecuteSqlRaw("ALTER TABLE Categories ADD COLUMN Color TEXT NOT NULL DEFAULT '#2F5BEA'");
+            for (var i = 0; i < ColorPalette.Colors.Length && i < 8; i++)
+                db.Database.ExecuteSqlRaw("UPDATE Categories SET Color = {0} WHERE Id = {1}", ColorPalette.Colors[i], i + 1);
         }
         db.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
     }
