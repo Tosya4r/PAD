@@ -9,6 +9,9 @@
         <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
             <views:DashboardView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ProjectsViewModel}">
+            <views:ProjectsView/>
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:PlaceholderViewModel}">
             <StackPanel Margin="8,22,28,24">
                 <TextBlock Text="{Binding Title}" Style="{StaticResource PageTitle}"/>
