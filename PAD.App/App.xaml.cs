@@ -33,10 +33,13 @@ public partial class App : Application
             return;
         }
 
+        try { BackupService.AutoBackup(DbPath, Path.Combine(Path.GetDirectoryName(DbPath)!, "backups")); }
+        catch (Exception ex) { LogError(ex); } // автокопия не должна мешать запуску
+
         new MainWindow().Show();
     }
 
-    static void LogAndShow(Exception ex)
+    static void LogError(Exception ex)
     {
         try
         {
@@ -45,6 +48,11 @@ public partial class App : Application
             File.AppendAllText(Path.Combine(dir, "error.log"), $"{DateTime.Now:s} {ex}\n\n");
         }
         catch { /* лог не должен ронять приложение */ }
+    }
+
+    static void LogAndShow(Exception ex)
+    {
+        LogError(ex);
         MessageBox.Show(ex.Message, "PAD — ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
     }
 }

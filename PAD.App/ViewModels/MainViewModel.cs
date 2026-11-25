@@ -36,7 +36,7 @@ public sealed partial class MainViewModel : ObservableObject
             Stub("Архив", "", "#7A8190"),
             Stub("Шаблоны", "", "#D6409F"),
             Stub("Мой профиль", "", "#3E8EED"),
-            Stub("Настройки", "", "#7A8190"),
+            new("Настройки", "", "#7A8190", () => new SettingsViewModel()),
         };
         Navigator.OpenProject = OpenProject;
         Selected = Items[0];
