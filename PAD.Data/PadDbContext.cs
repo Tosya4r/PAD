@@ -32,15 +32,16 @@ public sealed class PadDbContext : DbContext
         m.Entity<Category>(e =>
         {
             e.Property(x => x.Name).IsRequired().HasMaxLength(100);
+            e.Property(x => x.Color).IsRequired().HasMaxLength(7);
             e.HasData(
-                new Category { Id = 1, Name = "Лендинги" },
-                new Category { Id = 2, Name = "Корпоративные сайты" },
-                new Category { Id = 3, Name = "Интернет-магазины" },
-                new Category { Id = 4, Name = "Веб-приложения" },
-                new Category { Id = 5, Name = "SaaS" },
-                new Category { Id = 6, Name = "CRM" },
-                new Category { Id = 7, Name = "Индивидуальная разработка" },
-                new Category { Id = 8, Name = "Другие проекты" });
+                new Category { Id = 1, Name = "Лендинги", Color = ColorPalette.Colors[0] },
+                new Category { Id = 2, Name = "Корпоративные сайты", Color = ColorPalette.Colors[1] },
+                new Category { Id = 3, Name = "Интернет-магазины", Color = ColorPalette.Colors[2] },
+                new Category { Id = 4, Name = "Веб-приложения", Color = ColorPalette.Colors[3] },
+                new Category { Id = 5, Name = "SaaS", Color = ColorPalette.Colors[4] },
+                new Category { Id = 6, Name = "CRM", Color = ColorPalette.Colors[5] },
+                new Category { Id = 7, Name = "Индивидуальная разработка", Color = ColorPalette.Colors[6] },
+                new Category { Id = 8, Name = "Другие проекты", Color = ColorPalette.Colors[7] });
         });
 
         m.Entity<Project>(e =>
@@ -99,6 +100,28 @@ public static class PadDatabase
     public static void Initialize(PadDbContext db)
     {
         db.Database.EnsureCreated();
+        if (!ColumnExists(db, "Categories", "Color"))
+        {
+            // База старой версии. Пока в ней нет проектов — пересоздаём; иначе данные не трогаем.
+            if (Scalar(db, "SELECT COUNT(*) FROM Projects") > 0)
+                throw new InvalidOperationException("Схема базы устарела, а в ней есть данные. Автоматическое обновление ещё не реализовано.");
+            db.Database.CloseConnection();
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
+            db.Database.EnsureDeleted();
+            db.Database.EnsureCreated();
+        }
         db.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
     }
+
+    static long Scalar(PadDbContext db, string sql)
+    {
+        var conn = db.Database.GetDbConnection();
+        if (conn.State != System.Data.ConnectionState.Open) conn.Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = sql;
+        return Convert.ToInt64(cmd.ExecuteScalar());
+    }
+
+    static bool ColumnExists(PadDbContext db, string table, string column) =>
+        Scalar(db, $"SELECT COUNT(*) FROM pragma_table_info('{table}') WHERE name='{column}'") > 0;
 }

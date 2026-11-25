@@ -8,6 +8,8 @@ public class Category
 {
     public int Id { get; set; }
     public string Name { get; set; } = "";
+    /// <summary>Цвет категории (#RRGGBB) для диаграмм. Назначается автоматически из палитры.</summary>
+    public string Color { get; set; } = "#2F5BEA";
 }
 
 public class Project
