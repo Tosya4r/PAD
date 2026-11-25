@@ -76,8 +76,11 @@ public sealed partial class ProjectsViewModel : ObservableObject
     decimal _detailPrice;
     bool _suppress;
 
-    public ProjectsViewModel()
+    readonly int? _openId;
+
+    public ProjectsViewModel(int? openId = null)
     {
+        _openId = openId;
         payType = PaymentTypes[0];
         newStatus = StatusOptions.First(o => o.Value == ProjectStatus.InProgress);
         _ = InitAsync();
@@ -90,7 +93,8 @@ public sealed partial class ProjectsViewModel : ObservableObject
             using var db = App.CreateDb();
             Categories = await db.Categories.AsNoTracking().ToListAsync();
             NewCategory = Categories.FirstOrDefault();
-            await LoadListAsync(null);
+            await LoadListAsync(_openId);
+            if (_openId.HasValue) await LoadDetailAsync(_openId);
         });
     }
 

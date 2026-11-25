@@ -28,14 +28,7 @@ public static class DashboardService
         var projects = await db.Projects.AsNoTracking().Include(p => p.Payments).ToListAsync(ct);
         var categories = await db.Categories.AsNoTracking().OrderBy(c => c.Id).ToListAsync(ct);
 
-        var monthStart = new DateOnly(today.Year, today.Month, 1);
-        DateOnly? from = period switch
-        {
-            ChartPeriod.Month => monthStart,
-            ChartPeriod.Last6 => monthStart.AddMonths(-5),
-            ChartPeriod.Last12 => monthStart.AddMonths(-11),
-            _ => null,
-        };
+        var from = PeriodStart(today, period);
 
         var potential = new Dictionary<string, decimal>();
         var earned = new Dictionary<string, decimal>();
@@ -91,6 +84,18 @@ public static class DashboardService
             live.Count(p => p.Status == ProjectStatus.OnHold),
             Clean(potential), Clean(earned), Clean(pending), Clean(month),
             shares, chartCurrency);
+    }
+
+    public static DateOnly? PeriodStart(DateOnly today, ChartPeriod period)
+    {
+        var monthStart = new DateOnly(today.Year, today.Month, 1);
+        return period switch
+        {
+            ChartPeriod.Month => monthStart,
+            ChartPeriod.Last6 => monthStart.AddMonths(-5),
+            ChartPeriod.Last12 => monthStart.AddMonths(-11),
+            _ => null,
+        };
     }
 
     static void Add(Dictionary<string, decimal> d, string cur, decimal v) => d[cur] = d.GetValueOrDefault(cur) + v;

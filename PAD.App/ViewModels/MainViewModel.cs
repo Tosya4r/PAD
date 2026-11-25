@@ -28,7 +28,7 @@ public sealed partial class MainViewModel : ObservableObject
         Items = new NavItem[]
         {
             new("Главная", "", "#2F5BEA", () => new DashboardViewModel()),
-            new("Мои проекты", "", "#6B5CE7", () => new ProjectsViewModel()),
+            new("Мои проекты", "", "#6B5CE7", () => TakeProjects()),
             Stub("Задачи", "", "#1E9E5A"),
             Stub("Календарь", "", "#E5484D"),
             Stub("Финансы", "", "#12A594"),
@@ -38,7 +38,25 @@ public sealed partial class MainViewModel : ObservableObject
             Stub("Мой профиль", "", "#3E8EED"),
             Stub("Настройки", "", "#7A8190"),
         };
+        Navigator.OpenProject = OpenProject;
         Selected = Items[0];
+    }
+
+    int? _pendingProjectId;
+
+    ProjectsViewModel TakeProjects()
+    {
+        var vm = new ProjectsViewModel(_pendingProjectId);
+        _pendingProjectId = null;
+        return vm;
+    }
+
+    void OpenProject(int id)
+    {
+        _pendingProjectId = id;
+        var projects = Items[1];
+        if (Selected == projects) Selected = null;
+        Selected = projects;
     }
 
     partial void OnSelectedChanged(NavItem? value)
