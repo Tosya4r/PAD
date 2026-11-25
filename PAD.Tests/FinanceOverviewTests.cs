@@ -75,16 +75,16 @@ public sealed class FinanceOverviewTests : IDisposable
     public async Task Archive_Hides_Project_But_Keeps_Money()
     {
         await Seed();
-        var id = (await ProjectService.ListAsync(_db, "Paid")).Single().Id;
+        var id = (await ProjectService.ListAsync(_db)).Single(r => r.Name == "Paid").Id;
         await ProjectService.SetArchivedAsync(_db, id, true);
 
-        Assert.Empty(await ProjectService.ListAsync(_db, "Paid"));
-        Assert.Single(await ProjectService.ListAsync(_db, "Paid", archived: true));
+        Assert.DoesNotContain(await ProjectService.ListAsync(_db), r => r.Name == "Paid");
+        Assert.Equal("Paid", (await ProjectService.ListAsync(_db, null, archived: true)).Single().Name);
         var stats = await DashboardService.LoadAsync(_db, Today);
         Assert.Equal(1500m, stats.Earned["EUR"]);    // 1000 + 500: деньги архива не пропали
 
         await ProjectService.SetArchivedAsync(_db, id, false);
-        Assert.Single(await ProjectService.ListAsync(_db, "Paid"));
+        Assert.Contains(await ProjectService.ListAsync(_db), r => r.Name == "Paid");
     }
 
     [Fact]
