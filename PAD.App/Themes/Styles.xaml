@@ -7,23 +7,22 @@
     </Style>
 
     <Style x:Key="PageTitle" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="22"/>
+        <Setter Property="FontSize" Value="28"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="Margin" Value="0,0,0,16"/>
     </Style>
 
     <Style x:Key="SectionTitle" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="12"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
-        <Setter Property="Margin" Value="0,8,0,8"/>
+        <Setter Property="Margin" Value="2,22,0,10"/>
     </Style>
 
     <Style x:Key="NavItem" TargetType="ListBoxItem">
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListBoxItem">
-                    <Border x:Name="Bd" Background="Transparent" CornerRadius="6" Padding="10,8" Margin="6,1">
+                    <Border x:Name="Bd" Background="Transparent" CornerRadius="10" Padding="8,7" Margin="8,1">
                         <ContentPresenter/>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -39,16 +38,47 @@
         </Setter>
     </Style>
 
-    <DataTemplate x:Key="TileTemplate">
-        <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}"
-                BorderThickness="1" CornerRadius="8" Margin="0,0,12,12">
-            <Grid>
-                <Border Width="3" HorizontalAlignment="Left" Background="{Binding Accent}" CornerRadius="8,0,0,8"/>
-                <StackPanel Margin="18,14,14,14">
-                    <TextBlock Text="{Binding Label}" Foreground="{DynamicResource TextMutedBrush}" FontSize="12"/>
-                    <TextBlock Text="{Binding Value}" FontSize="22" FontWeight="SemiBold" Margin="0,6,0,0" TextWrapping="Wrap"/>
-                </StackPanel>
-            </Grid>
+    <!-- Компактная ячейка счётчика -->
+    <DataTemplate x:Key="CountTemplate">
+        <StackPanel Margin="22,16,12,16">
+            <StackPanel Orientation="Horizontal">
+                <Border Width="8" Height="8" CornerRadius="4" Background="{Binding Accent}" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding Label}" Foreground="{DynamicResource TextMutedBrush}" FontSize="12.5" Margin="8,0,0,0"/>
+            </StackPanel>
+            <ItemsControl ItemsSource="{Binding Lines}" Margin="0,6,0,0">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Amount}" FontSize="28" FontWeight="SemiBold"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </DataTemplate>
+
+    <!-- Крупная денежная плитка: тонированный фон, цветной значок, крупная сумма -->
+    <DataTemplate x:Key="MoneyTileTemplate">
+        <Border Background="{Binding Tint}" CornerRadius="14" Padding="18,16" Margin="0,0,14,0" MinHeight="136">
+            <DockPanel>
+                <Border DockPanel.Dock="Top" Width="34" Height="34" CornerRadius="10"
+                        Background="{Binding Accent}" HorizontalAlignment="Left">
+                    <TextBlock Text="{Binding Glyph}" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                               Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <TextBlock DockPanel.Dock="Top" Text="{Binding Label}" FontSize="13" FontWeight="Medium"
+                           Foreground="{DynamicResource TextMutedBrush}" Margin="0,14,0,4"/>
+                <ItemsControl ItemsSource="{Binding Lines}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Amount}" FontSize="30" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding Unit}" FontSize="14" FontWeight="Medium"
+                                           Foreground="{DynamicResource TextMutedBrush}"
+                                           Margin="6,0,0,6" VerticalAlignment="Bottom"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </DockPanel>
         </Border>
     </DataTemplate>
 </ResourceDictionary>

@@ -10,35 +10,55 @@
             <views:DashboardView/>
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:PlaceholderViewModel}">
-            <StackPanel Margin="24">
+            <StackPanel Margin="8,22,28,24">
                 <TextBlock Text="{Binding Title}" Style="{StaticResource PageTitle}"/>
-                <TextBlock Text="{Binding Text}" Foreground="{DynamicResource TextMutedBrush}"/>
+                <TextBlock Text="{Binding Text}" Foreground="{DynamicResource TextMutedBrush}" Margin="0,6,0,0"/>
             </StackPanel>
         </DataTemplate>
     </Window.Resources>
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="240"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Border Background="{DynamicResource SidebarBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,1,0">
+        <!-- Боковая панель — отдельная карточка -->
+        <Border Margin="12" Background="{DynamicResource SidebarBrush}" CornerRadius="16">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.08" Color="#101828"/>
+            </Border.Effect>
             <DockPanel>
-                <StackPanel DockPanel.Dock="Bottom" Margin="16,8,16,14">
-                    <TextBlock Text="{Binding StoragePath}" FontSize="10" Foreground="{DynamicResource TextMutedBrush}"
-                               TextWrapping="Wrap" ToolTip="{Binding StoragePath}"/>
+                <StackPanel DockPanel.Dock="Bottom" Margin="20,8,16,16">
+                    <TextBlock Text="Данные хранятся только на этом компьютере" FontSize="11"
+                               Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap"
+                               ToolTip="{Binding StoragePath}"/>
                     <TextBlock Text="{Binding Version}" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,4,0,0"/>
                 </StackPanel>
-                <TextBlock DockPanel.Dock="Top" Text="PAD" FontSize="18" FontWeight="Bold" Margin="18,18,0,14"/>
+
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="18,20,0,16">
+                    <Border Width="34" Height="34" CornerRadius="10" Background="{DynamicResource AccentBrush}">
+                        <TextBlock Text="P" Foreground="White" FontSize="18" FontWeight="Bold"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="PAD" FontSize="16" FontWeight="Bold"/>
+                        <TextBlock Text="Personal Administration Desk" FontSize="9.5" Foreground="{DynamicResource TextMutedBrush}"/>
+                    </StackPanel>
+                </StackPanel>
+
                 <ListBox ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}"
                          Background="Transparent" BorderThickness="0"
                          ItemContainerStyle="{StaticResource NavItem}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding Glyph}" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="26"/>
-                                <TextBlock Text="{Binding Title}" FontSize="13" VerticalAlignment="Center"/>
+                                <Border Width="28" Height="28" CornerRadius="8" Background="{Binding Color}">
+                                    <TextBlock Text="{Binding Glyph}" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                               Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="{Binding Title}" FontSize="13.5" FontWeight="Medium"
+                                           Margin="12,0,0,0" VerticalAlignment="Center"/>
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>

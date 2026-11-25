@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace PAD.Desktop.ViewModels;
 
-public sealed record NavItem(string Title, string Glyph, Func<ObservableObject> Create);
+public sealed record NavItem(string Title, string Glyph, string Color, Func<ObservableObject> Create);
 
 public sealed partial class PlaceholderViewModel : ObservableObject
 {
@@ -22,21 +22,21 @@ public sealed partial class MainViewModel : ObservableObject
 
     public MainViewModel()
     {
-        static NavItem Stub(string title, string glyph) =>
-            new(title, glyph, () => new PlaceholderViewModel(title, "Раздел в разработке."));
+        static NavItem Stub(string title, string glyph, string color) =>
+            new(title, glyph, color, () => new PlaceholderViewModel(title, "Раздел в разработке."));
 
         Items = new NavItem[]
         {
             new("Главная", "", () => new DashboardViewModel()),
-            Stub("Мои проекты", ""),
-            Stub("Задачи", ""),
-            Stub("Календарь", ""),
-            Stub("Финансы", ""),
-            Stub("База знаний", ""),
-            Stub("Архив", ""),
-            Stub("Шаблоны", ""),
-            Stub("Мой профиль", ""),
-            Stub("Настройки", ""),
+            Stub("Мои проекты", "", "#6B5CE7"),
+            Stub("Задачи", "", "#1E9E5A"),
+            Stub("Календарь", "", "#E5484D"),
+            Stub("Финансы", "", "#12A594"),
+            Stub("База знаний", "", "#D98A00"),
+            Stub("Архив", "", "#7A8190"),
+            Stub("Шаблоны", "", "#D6409F"),
+            Stub("Мой профиль", "", "#3E8EED"),
+            Stub("Настройки", "", "#7A8190"),
         };
         Selected = Items[0];
     }
