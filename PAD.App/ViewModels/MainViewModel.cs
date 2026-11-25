@@ -27,7 +27,7 @@ public sealed partial class MainViewModel : ObservableObject
 
         Items = new NavItem[]
         {
-            new("Главная", "", () => new DashboardViewModel()),
+            new("Главная", "", "#2F5BEA", () => new DashboardViewModel()),
             Stub("Мои проекты", "", "#6B5CE7"),
             Stub("Задачи", "", "#1E9E5A"),
             Stub("Календарь", "", "#E5484D"),
