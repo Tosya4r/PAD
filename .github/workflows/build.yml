@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  build:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,3 +15,9 @@ jobs:
           dotnet-version: 8.0.x
       - name: Test
         run: dotnet test PAD.Tests/PAD.Tests.csproj --configuration Release
+      - name: Publish PAD.exe
+        run: dotnet publish PAD.App/PAD.App.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PAD-win-x64
+          path: publish/PAD.exe

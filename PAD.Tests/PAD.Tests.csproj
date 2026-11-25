@@ -12,5 +12,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PAD.Domain\PAD.Domain.csproj" />
+    <ProjectReference Include="..\PAD.Data\PAD.Data.csproj" />
   </ItemGroup>
 </Project>

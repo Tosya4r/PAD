@@ -4,7 +4,7 @@ using Xunit;
 public class FinanceCalculatorTests
 {
     static PaymentRecord P(decimal a, PaymentType t, int month = 11, bool received = true, string cur = "EUR") =>
-        new(Guid.NewGuid(), a, cur, new DateOnly(2026, month, 25), t, received);
+        new(0, a, cur, new DateOnly(2026, month, 25), t, received);
 
     [Fact]
     public void Example_From_Spec_1500_Price_1000_Received()

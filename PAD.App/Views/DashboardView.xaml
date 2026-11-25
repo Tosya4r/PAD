@@ -1,0 +1,27 @@
+<UserControl x:Class="PAD.Desktop.Views.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24">
+            <TextBlock Text="Главная" Style="{StaticResource PageTitle}"/>
+            <TextBlock Text="{Binding Error}" Foreground="{DynamicResource OverdueBrush}" TextWrapping="Wrap"/>
+
+            <TextBlock Text="Проекты" Style="{StaticResource SectionTitle}"/>
+            <ItemsControl ItemsSource="{Binding CountTiles}" ItemTemplate="{StaticResource TileTemplate}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><UniformGrid Rows="1"/></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+
+            <TextBlock Text="Финансы" Style="{StaticResource SectionTitle}"/>
+            <ItemsControl ItemsSource="{Binding FinanceTiles}" ItemTemplate="{StaticResource TileTemplate}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><UniformGrid Rows="1"/></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+
+            <TextBlock Margin="0,12,0,0" Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap"
+                       Text="Показатели считаются из сохранённых данных. Заработок — только фактически полученные платежи, договорная стоимость в него не входит."/>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

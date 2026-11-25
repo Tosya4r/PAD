@@ -5,7 +5,7 @@ public enum PaymentType { Prepayment, Intermediate, Final, Additional, Refund }
 public enum PaymentStatus { Unpaid, PartiallyPaid, Paid, Overpaid, Refunded }
 
 public sealed record PaymentRecord(
-    Guid Id,
+    int Id,
     decimal Amount,          // всегда положительное; знак определяется типом
     string Currency,
     DateOnly ReceivedDate,
