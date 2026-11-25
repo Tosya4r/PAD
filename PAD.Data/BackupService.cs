@@ -117,11 +117,11 @@ public static class BackupService
     }
 
     /// <summary>Одна автокопия в день, хранится последние <paramref name="keep"/> штук.</summary>
-    public static void AutoBackup(string dbPath, string backupsDir, int keep = 7, DateOnly? today = null)
+    public static void AutoBackup(string dbPath, string backupsDir, int keep = 7, DateOnly? today = null, string? filesDir = null)
     {
         var day = today ?? DateOnly.FromDateTime(DateTime.Today);
         var target = Path.Combine(backupsDir, $"auto-{day:yyyyMMdd}.zip");
-        if (!File.Exists(target)) CreateBackup(dbPath, target);
+        if (!File.Exists(target)) CreateBackup(dbPath, target, filesDir);
 
         var old = Directory.GetFiles(backupsDir, "auto-*.zip").OrderByDescending(Path.GetFileName).Skip(keep);
         foreach (var f in old)

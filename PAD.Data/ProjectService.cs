@@ -38,10 +38,10 @@ public static class ProjectService
         return p.Id;
     }
 
-    public static async Task<List<ProjectRow>> ListAsync(PadDbContext db, string? search = null, CancellationToken ct = default)
+    public static async Task<List<ProjectRow>> ListAsync(PadDbContext db, string? search = null, bool archived = false, CancellationToken ct = default)
     {
         var list = await db.Projects.AsNoTracking().Include(p => p.Category).Include(p => p.Payments)
-            .Where(p => !p.IsArchived).ToListAsync(ct);
+            .Where(p => p.IsArchived == archived).ToListAsync(ct);
 
         var s = search?.Trim();
         if (!string.IsNullOrEmpty(s))
@@ -142,6 +142,23 @@ public static class ProjectService
         foreach (var d in p.Deliveries.Where(d => d.ReopenedAt is null)) d.ReopenedAt = DateTime.Now;
         db.StatusHistory.Add(new ProjectStatusHistory { ProjectId = p.Id, ChangedAt = DateTime.Now, OldStatus = p.Status, NewStatus = ProjectStatus.InProgress });
         p.Status = ProjectStatus.InProgress;
+        await db.SaveChangesAsync(ct);
+    }
+
+    /// <summary>Архивирование только скрывает проект: платежи и история остаются, статистика прошлых периодов не меняется.</summary>
+    public static async Task SetArchivedAsync(PadDbContext db, int projectId, bool archived, CancellationToken ct = default)
+    {
+        var p = await db.Projects.FindAsync(new object[] { projectId }, ct) ?? throw new InvalidOperationException("Проект не найден.");
+        p.IsArchived = archived;
+        await db.SaveChangesAsync(ct);
+    }
+
+    /// <summary>Полное удаление проекта вместе с платежами (каскадом). Вызывать только после подтверждения.</summary>
+    public static async Task DeleteAsync(PadDbContext db, int projectId, CancellationToken ct = default)
+    {
+        var p = await db.Projects.FindAsync(new object[] { projectId }, ct);
+        if (p is null) return;
+        db.Projects.Remove(p);
         await db.SaveChangesAsync(ct);
     }
 

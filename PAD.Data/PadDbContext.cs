@@ -24,6 +24,7 @@ public sealed class PadDbContext : DbContext
     public DbSet<ProjectDelivery> Deliveries => Set<ProjectDelivery>();
     public DbSet<ProjectPriceHistory> PriceHistory => Set<ProjectPriceHistory>();
     public DbSet<ProjectStatusHistory> StatusHistory => Set<ProjectStatusHistory>();
+    public DbSet<TaskItem> Tasks => Set<TaskItem>();
 
     protected override void OnModelCreating(ModelBuilder m)
     {
@@ -79,6 +80,16 @@ public sealed class PadDbContext : DbContext
             e.HasOne(x => x.Project).WithMany(p => p.PriceHistory).HasForeignKey(x => x.ProjectId).OnDelete(DeleteBehavior.Cascade);
         });
 
+        m.Entity<TaskItem>(e =>
+        {
+            e.ToTable("Tasks");
+            e.Property(x => x.Title).IsRequired().HasMaxLength(300);
+            e.Property(x => x.Status).HasConversion<string>().HasMaxLength(32);
+            e.Property(x => x.Priority).HasConversion<string>().HasMaxLength(32);
+            e.HasOne(x => x.Project).WithMany().HasForeignKey(x => x.ProjectId).OnDelete(DeleteBehavior.SetNull);
+            e.HasIndex(x => x.Status);
+        });
+
         m.Entity<ProjectStatusHistory>(e =>
         {
             e.Property(x => x.OldStatus).HasConversion<string>().HasMaxLength(32);
@@ -107,6 +118,13 @@ public static class PadDatabase
             for (var i = 0; i < ColorPalette.Colors.Length && i < 8; i++)
                 db.Database.ExecuteSqlRaw("UPDATE Categories SET Color = {0} WHERE Id = {1}", ColorPalette.Colors[i], i + 1);
         }
+        db.Database.ExecuteSqlRaw(@"CREATE TABLE IF NOT EXISTS ""Tasks"" (
+            ""Id"" INTEGER NOT NULL CONSTRAINT ""PK_Tasks"" PRIMARY KEY AUTOINCREMENT,
+            ""Title"" TEXT NOT NULL, ""Notes"" TEXT NOT NULL, ""ProjectId"" INTEGER NULL,
+            ""Status"" TEXT NOT NULL, ""Priority"" TEXT NOT NULL, ""Due"" TEXT NULL,
+            ""CreatedAt"" TEXT NOT NULL, ""CompletedAt"" TEXT NULL,
+            CONSTRAINT ""FK_Tasks_Projects_ProjectId"" FOREIGN KEY (""ProjectId"") REFERENCES ""Projects"" (""Id"") ON DELETE SET NULL)");
+        db.Database.ExecuteSqlRaw("CREATE INDEX IF NOT EXISTS \"IX_Tasks_Status\" ON \"Tasks\" (\"Status\")");
         db.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
     }
 

@@ -4,6 +4,8 @@ public enum ProjectStatus { Planned, WaitingStart, InProgress, OnHold, InReview,
 
 public enum Priority { Low, Medium, High, Critical }
 
+public enum WorkStatus { Todo, InProgress, Waiting, Done }
+
 public class Category
 {
     public int Id { get; set; }
@@ -97,4 +99,18 @@ public class ProjectStatusHistory
     public DateTime ChangedAt { get; set; }
     public ProjectStatus OldStatus { get; set; }
     public ProjectStatus NewStatus { get; set; }
+}
+
+public class TaskItem
+{
+    public int Id { get; set; }
+    public string Title { get; set; } = "";
+    public string Notes { get; set; } = "";
+    public int? ProjectId { get; set; }
+    public Project? Project { get; set; }
+    public WorkStatus Status { get; set; } = WorkStatus.Todo;
+    public Priority Priority { get; set; } = Priority.Medium;
+    public DateOnly? Due { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime? CompletedAt { get; set; }
 }
