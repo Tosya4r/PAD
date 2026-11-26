@@ -25,6 +25,8 @@ public sealed class PadDbContext : DbContext
     public DbSet<ProjectPriceHistory> PriceHistory => Set<ProjectPriceHistory>();
     public DbSet<ProjectStatusHistory> StatusHistory => Set<ProjectStatusHistory>();
     public DbSet<TaskItem> Tasks => Set<TaskItem>();
+    public DbSet<Note> Notes => Set<Note>();
+    public DbSet<ProjectTemplate> Templates => Set<ProjectTemplate>();
 
     protected override void OnModelCreating(ModelBuilder m)
     {
@@ -80,6 +82,19 @@ public sealed class PadDbContext : DbContext
             e.HasOne(x => x.Project).WithMany(p => p.PriceHistory).HasForeignKey(x => x.ProjectId).OnDelete(DeleteBehavior.Cascade);
         });
 
+        m.Entity<Note>(e =>
+        {
+            e.ToTable("Notes");
+            e.Property(x => x.Title).IsRequired().HasMaxLength(300);
+        });
+
+        m.Entity<ProjectTemplate>(e =>
+        {
+            e.ToTable("Templates");
+            e.Property(x => x.Name).IsRequired().HasMaxLength(200);
+            e.Property(x => x.Price).HasConversion(money);
+        });
+
         m.Entity<TaskItem>(e =>
         {
             e.ToTable("Tasks");
@@ -125,6 +140,14 @@ public static class PadDatabase
             ""CreatedAt"" TEXT NOT NULL, ""CompletedAt"" TEXT NULL,
             CONSTRAINT ""FK_Tasks_Projects_ProjectId"" FOREIGN KEY (""ProjectId"") REFERENCES ""Projects"" (""Id"") ON DELETE SET NULL)");
         db.Database.ExecuteSqlRaw("CREATE INDEX IF NOT EXISTS \"IX_Tasks_Status\" ON \"Tasks\" (\"Status\")");
+        db.Database.ExecuteSqlRaw(@"CREATE TABLE IF NOT EXISTS ""Notes"" (
+            ""Id"" INTEGER NOT NULL CONSTRAINT ""PK_Notes"" PRIMARY KEY AUTOINCREMENT,
+            ""Title"" TEXT NOT NULL, ""Body"" TEXT NOT NULL, ""Tags"" TEXT NOT NULL,
+            ""CreatedAt"" TEXT NOT NULL, ""UpdatedAt"" TEXT NOT NULL)");
+        db.Database.ExecuteSqlRaw(@"CREATE TABLE IF NOT EXISTS ""Templates"" (
+            ""Id"" INTEGER NOT NULL CONSTRAINT ""PK_Templates"" PRIMARY KEY AUTOINCREMENT,
+            ""Name"" TEXT NOT NULL, ""Description"" TEXT NOT NULL, ""CategoryId"" INTEGER NULL,
+            ""Price"" INTEGER NOT NULL, ""Currency"" TEXT NOT NULL, ""TaskLines"" TEXT NOT NULL)");
         db.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
     }
 

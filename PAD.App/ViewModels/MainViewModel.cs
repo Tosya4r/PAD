@@ -29,6 +29,7 @@ public sealed partial class MainViewModel : ObservableObject
     public bool HasAvatar => Avatar is not null;
 
     int? _pendingProjectId;
+    int? _pendingNoteId;
     string? _pendingSearch;
     bool _pendingCreate;
 
@@ -45,7 +46,15 @@ public sealed partial class MainViewModel : ObservableObject
         };
 
         Navigator.OpenProject = OpenProject;
-        Navigator.Search = text => { _pendingSearch = text; Go(1); };
+        Navigator.Search = text => { Selected = null; CurrentPage = new SearchViewModel(text); };
+        Navigator.Go = (title, id) =>
+        {
+            _pendingNoteId = id;
+            var item = Items.FirstOrDefault(i => i.Title == title);
+            if (item is null) return;
+            if (Selected == item) Selected = null;
+            Selected = item;
+        };
         Navigator.NewProject = () => { _pendingCreate = true; Go(1); };
 
         ProfileService.Changed += RefreshProfile;
@@ -84,6 +93,13 @@ public sealed partial class MainViewModel : ObservableObject
         _pendingProjectId = null;
         _pendingSearch = null;
         _pendingCreate = false;
+        return vm;
+    }
+
+    KnowledgeViewModel TakeKnowledge()
+    {
+        var vm = new KnowledgeViewModel(_pendingNoteId);
+        _pendingNoteId = null;
         return vm;
     }
 

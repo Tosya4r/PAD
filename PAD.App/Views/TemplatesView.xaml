@@ -1,0 +1,72 @@
+<UserControl x:Class="PAD.Desktop.Views.TemplatesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources><BooleanToVisibilityConverter x:Key="B2V"/></UserControl.Resources>
+    <Grid Margin="8,8,28,24">
+        <Grid.ColumnDefinitions><ColumnDefinition Width="340"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+        <DockPanel Margin="0,0,20,0">
+            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                <Button DockPanel.Dock="Right" Style="{StaticResource AccentButton}" Command="{Binding NewCommand}" VerticalAlignment="Center">
+                    <TextBlock Text="+ Шаблон" Foreground="{DynamicResource AccentTextBrush}" FontWeight="Medium"/>
+                </Button>
+                <TextBlock Text="Шаблоны" Style="{StaticResource PageTitle}" FontSize="24"/>
+            </DockPanel>
+            <TextBlock DockPanel.Dock="Top" Text="Шаблон хранит стоимость, категорию, описание и типовые задачи. Из него создаётся проект в один клик."
+                       TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,10"/>
+            <ListBox ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}" Background="Transparent" BorderThickness="0"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled" ItemContainerStyle="{StaticResource LegendRow}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel>
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding Sub}" FontSize="12" Foreground="{DynamicResource TextMutedBrush}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </DockPanel>
+        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+            <Border Style="{StaticResource Card}" Visibility="{Binding Editing, Converter={StaticResource B2V}}">
+                <StackPanel>
+                    <TextBlock Text="Название шаблона" Style="{StaticResource FieldLabel}" Margin="0,0,0,4"/>
+                    <TextBox Style="{StaticResource Input}" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+                    <UniformGrid Rows="1">
+                        <StackPanel Margin="0,0,10,0">
+                            <TextBlock Text="Категория" Style="{StaticResource FieldLabel}"/>
+                            <ComboBox ItemsSource="{Binding Categories}" DisplayMemberPath="Name" SelectedItem="{Binding Category}"/>
+                        </StackPanel>
+                        <StackPanel Margin="0,0,10,0">
+                            <TextBlock Text="Стоимость" Style="{StaticResource FieldLabel}"/>
+                            <TextBox Style="{StaticResource Input}" Text="{Binding Price, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="Валюта" Style="{StaticResource FieldLabel}"/>
+                            <ComboBox ItemsSource="{Binding Currencies}" SelectedItem="{Binding Currency}"/>
+                        </StackPanel>
+                    </UniformGrid>
+                    <TextBlock Text="Описание" Style="{StaticResource FieldLabel}"/>
+                    <TextBox Style="{StaticResource Input}" Height="70" AcceptsReturn="True" TextWrapping="Wrap"
+                             Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock Text="Типовые задачи (по одной в строке)" Style="{StaticResource FieldLabel}"/>
+                    <TextBox Style="{StaticResource Input}" Height="130" AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
+                             Text="{Binding TaskLines, UpdateSourceTrigger=PropertyChanged}"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                        <Button Style="{StaticResource AccentButton}" Command="{Binding SaveCommand}">
+                            <TextBlock Text="Сохранить" Foreground="{DynamicResource AccentTextBrush}" FontWeight="Medium"/>
+                        </Button>
+                        <Button Style="{StaticResource GhostButton}" Command="{Binding CreateProjectCommand}" Margin="8,0,0,0"><TextBlock Text="Создать проект из шаблона"/></Button>
+                        <Button Style="{StaticResource GhostButton}" Command="{Binding DeleteCommand}" Margin="8,0,0,0"><TextBlock Text="Удалить"/></Button>
+                    </StackPanel>
+                    <TextBlock Text="{Binding Status}" Margin="0,10,0,0" TextWrapping="Wrap">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                <Setter Property="Foreground" Value="{DynamicResource IncomeBrush}"/>
+                                <Style.Triggers><DataTrigger Binding="{Binding IsError}" Value="True"><Setter Property="Foreground" Value="{DynamicResource OverdueBrush}"/></DataTrigger></Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

@@ -12,6 +12,7 @@ public static class Navigator
     public static Action<int>? OpenProject;
     public static Action<string>? Search;
     public static Action? NewProject;
+    public static Action<string, int?>? Go;
 }
 
 public static class UiFormat
