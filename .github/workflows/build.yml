@@ -2,22 +2,49 @@ name: Build and test
 
 on:
   push:
+    branches: [main]
+    tags: ['v*']
   pull_request:
-  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+
       - name: Test
-        run: dotnet test PAD.Tests/PAD.Tests.csproj --configuration Release
-      - name: Publish PAD.exe
+        run: dotnet test PAD.Tests/PAD.Tests.csproj -c Release
+
+      - name: Publish
         run: dotnet publish PAD.App/PAD.App.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+
+      - name: Build installer
+        shell: pwsh
+        run: |
+          choco install innosetup -y --no-progress
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" installer\PAD.iss
+
       - uses: actions/upload-artifact@v4
         with:
           name: PAD-win-x64
           path: publish/PAD.exe
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PAD-Setup
+          path: installer-out/PAD-Setup.exe
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            installer-out/PAD-Setup.exe
+            publish/PAD.exe
