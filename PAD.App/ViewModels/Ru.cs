@@ -47,6 +47,15 @@ public static class Ru
         _ => "#8A929E",
     };
 
+    public static string Stage(StageStatus s) => s switch
+    {
+        StageStatus.NotStarted => "Не начат",
+        StageStatus.InProgress => "В работе",
+        StageStatus.InReview => "На проверке",
+        StageStatus.Done => "Завершён",
+        _ => "На паузе",
+    };
+
     public static string PayType(PaymentType t) => t switch
     {
         PaymentType.Prepayment => "Предоплата",

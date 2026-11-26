@@ -27,6 +27,7 @@ public sealed class PadDbContext : DbContext
     public DbSet<TaskItem> Tasks => Set<TaskItem>();
     public DbSet<Note> Notes => Set<Note>();
     public DbSet<ProjectTemplate> Templates => Set<ProjectTemplate>();
+    public DbSet<ProjectStage> Stages => Set<ProjectStage>();
 
     protected override void OnModelCreating(ModelBuilder m)
     {
@@ -111,6 +112,16 @@ public sealed class PadDbContext : DbContext
             e.Property(x => x.NewStatus).HasConversion<string>().HasMaxLength(32);
             e.HasOne(x => x.Project).WithMany(p => p.StatusHistory).HasForeignKey(x => x.ProjectId).OnDelete(DeleteBehavior.Cascade);
         });
+
+        m.Entity<ProjectStage>(e =>
+        {
+            e.ToTable("ProjectStages");
+            e.Property(x => x.Title).IsRequired().HasMaxLength(200);
+            e.Property(x => x.Status).HasConversion<string>().HasMaxLength(32);
+            e.Property(x => x.Content).HasMaxLength(100000);
+            e.HasOne(x => x.Project).WithMany(p => p.Stages).HasForeignKey(x => x.ProjectId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(x => new { x.ProjectId, x.Order });
+        });
     }
 }
 
@@ -148,6 +159,12 @@ public static class PadDatabase
             ""Id"" INTEGER NOT NULL CONSTRAINT ""PK_Templates"" PRIMARY KEY AUTOINCREMENT,
             ""Name"" TEXT NOT NULL, ""Description"" TEXT NOT NULL, ""CategoryId"" INTEGER NULL,
             ""Price"" INTEGER NOT NULL, ""Currency"" TEXT NOT NULL, ""TaskLines"" TEXT NOT NULL)");
+        db.Database.ExecuteSqlRaw(@"CREATE TABLE IF NOT EXISTS ""ProjectStages"" (
+            ""Id"" INTEGER NOT NULL CONSTRAINT ""PK_ProjectStages"" PRIMARY KEY AUTOINCREMENT,
+            ""ProjectId"" INTEGER NOT NULL, ""Order"" INTEGER NOT NULL, ""Title"" TEXT NOT NULL,
+            ""Status"" TEXT NOT NULL, ""Content"" TEXT NOT NULL, ""CreatedAt"" TEXT NOT NULL, ""UpdatedAt"" TEXT NOT NULL,
+            CONSTRAINT ""FK_ProjectStages_Projects_ProjectId"" FOREIGN KEY (""ProjectId"") REFERENCES ""Projects"" (""Id"") ON DELETE CASCADE)");
+        db.Database.ExecuteSqlRaw("CREATE INDEX IF NOT EXISTS \"IX_ProjectStages_ProjectId_Order\" ON \"ProjectStages\" (\"ProjectId\", \"Order\")");
         db.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
     }
 

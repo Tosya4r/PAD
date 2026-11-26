@@ -6,6 +6,8 @@ public enum Priority { Low, Medium, High, Critical }
 
 public enum WorkStatus { Todo, InProgress, Waiting, Done }
 
+public enum StageStatus { NotStarted, InProgress, InReview, Done, Paused }
+
 public class Category
 {
     public int Id { get; set; }
@@ -43,6 +45,21 @@ public class Project
     public List<ProjectDelivery> Deliveries { get; set; } = new();
     public List<ProjectPriceHistory> PriceHistory { get; set; } = new();
     public List<ProjectStatusHistory> StatusHistory { get; set; } = new();
+    public List<ProjectStage> Stages { get; set; } = new();
+}
+
+/// <summary>Этап рабочего пространства проекта с текстом (Markdown/заметки) и статусом.</summary>
+public class ProjectStage
+{
+    public int Id { get; set; }
+    public int ProjectId { get; set; }
+    public Project? Project { get; set; }
+    public int Order { get; set; }
+    public string Title { get; set; } = "";
+    public StageStatus Status { get; set; } = StageStatus.NotStarted;
+    public string Content { get; set; } = "";
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
 }
 
 /// <summary>Платёж. Заработком считается только при IsReceived = true.</summary>

@@ -12,6 +12,7 @@ public sealed record ProjectItem(int Id, string Name, string Client, string Cate
     string StatusText, string StatusColor, string PriceText, string PayText, string PayColor);
 
 public sealed record PaymentRow(int Id, string Date, string Type, string Amount, string Purpose, string Received);
+public sealed record StageItem(int Id, string Title, string StatusText, string StatusColor);
 
 public sealed record Option<T>(string Title, T Value);
 
@@ -20,12 +21,15 @@ public sealed partial class ProjectsViewModel : ObservableObject
     public ObservableCollection<ProjectItem> Items { get; } = new();
     public ObservableCollection<PaymentRow> Payments { get; } = new();
     public ObservableCollection<StatTile> DetailTiles { get; } = new();
+    public ObservableCollection<StageItem> Stages { get; } = new();
 
     public IReadOnlyList<string> Currencies { get; } = new[] { "EUR", "USD", "GBP", "PLN", "CZK", "RUB" };
     public IReadOnlyList<Option<ProjectStatus>> StatusOptions { get; } =
         Enum.GetValues<ProjectStatus>().Select(s => new Option<ProjectStatus>(Ru.Status(s), s)).ToList();
     public IReadOnlyList<Option<PaymentType>> PaymentTypes { get; } =
         Enum.GetValues<PaymentType>().Select(t => new Option<PaymentType>(Ru.PayType(t), t)).ToList();
+    public IReadOnlyList<Option<StageStatus>> StageStatusOptions { get; } =
+        Enum.GetValues<StageStatus>().Select(s => new Option<StageStatus>(Ru.Stage(s), s)).ToList();
 
     [ObservableProperty] private IReadOnlyList<Category> categories = Array.Empty<Category>();
     [ObservableProperty] private string? error;
@@ -67,6 +71,13 @@ public sealed partial class ProjectsViewModel : ObservableObject
     [ObservableProperty] private string delivUrl = "";
     [ObservableProperty] private string delivResult = "";
     [ObservableProperty] private string delivComment = "";
+
+    // этапы
+    [ObservableProperty] private StageItem? selectedStage;
+    [ObservableProperty] private string stageTitle = "";
+    [ObservableProperty] private string stageContent = "";
+    [ObservableProperty] private Option<StageStatus>? stageStatus;
+    [ObservableProperty] private string newStageTitle = "";
 
     public bool ShowDetail => HasDetail && !IsCreating;
     public bool ShowEmpty => !HasDetail && !IsCreating;
@@ -110,6 +121,12 @@ public sealed partial class ProjectsViewModel : ObservableObject
         IsCreating = false;
         IsDelivering = false;
         _ = Run(() => LoadDetailAsync(value?.Id));
+    }
+
+    partial void OnSelectedStageChanged(StageItem? value)
+    {
+        if (_suppress || value is null) return;
+        _ = Run(() => LoadStageAsync(value.Id));
     }
 
     partial void OnSelectedStatusChanged(Option<ProjectStatus>? value)
@@ -190,6 +207,25 @@ public sealed partial class ProjectsViewModel : ObservableObject
                 Payments.Add(new PaymentRow(p.Id, p.ReceivedDate.ToString("dd.MM.yyyy"), Ru.PayType(p.Type),
                     (p.Type == PaymentType.Refund ? "−" : "+") + Fmt(p.Amount) + " " + p.Currency,
                     p.Purpose, p.IsReceived ? "получен" : "ожидается"));
+
+            Stages.Clear();
+            var stages = await ProjectStageService.ListAsync(db, id.Value);
+            foreach (var s in stages)
+                Stages.Add(new StageItem(s.Id, s.Title, Ru.Stage(s.Status), StageColor(s.Status)));
+            if (Stages.Count > 0)
+            {
+                var first = Stages[0];
+                SelectedStage = first;
+                var st = stages.First(x => x.Id == first.Id);
+                StageTitle = st.Title;
+                StageContent = st.Content;
+                StageStatus = StageStatusOptions.First(o => o.Value == st.Status);
+            }
+            else
+            {
+                SelectedStage = null;
+                StageTitle = ""; StageContent = "";
+            }
 
             HasDetail = true;
         }
@@ -272,6 +308,85 @@ public sealed partial class ProjectsViewModel : ObservableObject
         await ProjectService.ReopenAsync(db, _detailId);
         await RefreshAsync(_detailId);
     });
+
+    async Task LoadStageAsync(int id)
+    {
+        using var db = App.CreateDb();
+        var s = await db.Stages.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+        if (s is null) return;
+        _suppress = true;
+        try
+        {
+            StageTitle = s.Title;
+            StageContent = s.Content;
+            StageStatus = StageStatusOptions.First(o => o.Value == s.Status);
+            SelectedStage = Stages.FirstOrDefault(x => x.Id == id);
+        }
+        finally { _suppress = false; }
+    }
+
+    async Task RefreshStagesAsync()
+    {
+        if (!HasDetail) return;
+        var keep = SelectedStage?.Id;
+        using var db = App.CreateDb();
+        var stages = await ProjectStageService.ListAsync(db, _detailId);
+        _suppress = true;
+        try
+        {
+            Stages.Clear();
+            foreach (var s in stages)
+                Stages.Add(new StageItem(s.Id, s.Title, Ru.Stage(s.Status), StageColor(s.Status)));
+            SelectedStage = keep.HasValue ? Stages.FirstOrDefault(s => s.Id == keep) : Stages.FirstOrDefault();
+        }
+        finally { _suppress = false; }
+        if (SelectedStage is not null) await LoadStageAsync(SelectedStage.Id);
+    }
+
+    [RelayCommand]
+    private Task SaveStageAsync() => Run(async () =>
+    {
+        if (SelectedStage is null) return;
+        using var db = App.CreateDb();
+        await ProjectStageService.SaveContentAsync(db, SelectedStage.Id, StageContent);
+        if (!string.IsNullOrWhiteSpace(StageTitle))
+            await ProjectStageService.SetTitleAsync(db, SelectedStage.Id, StageTitle);
+        if (StageStatus is not null)
+            await ProjectStageService.SetStatusAsync(db, SelectedStage.Id, StageStatus.Value);
+        await RefreshStagesAsync();
+    });
+
+    [RelayCommand]
+    private Task NewStageAsync() => Run(async () =>
+    {
+        if (!HasDetail) return;
+        if (string.IsNullOrWhiteSpace(NewStageTitle)) throw new ArgumentException("Введите название этапа.");
+        using var db = App.CreateDb();
+        await ProjectStageService.AddAsync(db, _detailId, NewStageTitle);
+        NewStageTitle = "";
+        await RefreshStagesAsync();
+    });
+
+    [RelayCommand]
+    private Task DeleteStageAsync() => Run(async () =>
+    {
+        if (SelectedStage is null) return;
+        var ok = System.Windows.MessageBox.Show("Удалить этап «" + SelectedStage.Title + "»?", "Удаление",
+            System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning);
+        if (ok != System.Windows.MessageBoxResult.Yes) return;
+        using var db = App.CreateDb();
+        await ProjectStageService.DeleteAsync(db, SelectedStage.Id);
+        await RefreshStagesAsync();
+    });
+
+    static string StageColor(StageStatus s) => s switch
+    {
+        StageStatus.Done => "#34D399",
+        StageStatus.InProgress => "#3B9EF0",
+        StageStatus.InReview => "#22B8CF",
+        StageStatus.Paused => "#F5A524",
+        _ => "#8A929E",
+    };
 
     static StatTile Tile(string label, decimal amount, string cur, string glyph, string accent, string tint) =>
         new(label, new[] { new MoneyLine(Fmt(amount), cur) }, glyph, accent, UiFormat.Tint(accent));

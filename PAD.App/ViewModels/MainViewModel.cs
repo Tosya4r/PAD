@@ -40,7 +40,10 @@ public sealed partial class MainViewModel : ObservableObject
             new("Главная", "", () => new DashboardViewModel()),
             new("Мои проекты", "", () => TakeProjects()),
             new("Задачи", "", () => new TasksViewModel()),
+            new("Календарь", "", () => new CalendarViewModel()),
             new("Финансы", "", () => new FinanceViewModel()),
+            new("База знаний", "", () => TakeKnowledge()),
+            new("Шаблоны", "", () => new TemplatesViewModel()),
             new("Архив", "", () => new ArchiveViewModel()),
             new("Настройки", "", () => new SettingsViewModel()),
         };
