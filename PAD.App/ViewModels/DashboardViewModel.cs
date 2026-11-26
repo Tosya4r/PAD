@@ -4,13 +4,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PAD.Data;
 using PAD.Desktop.Controls;
+using PAD.Desktop.Services;
 using PAD.Domain;
 
 namespace PAD.Desktop.ViewModels;
-
-public sealed record MoneyLine(string Amount, string Unit);
-
-public sealed record StatTile(string Label, IReadOnlyList<MoneyLine> Lines, string Glyph, string Accent, string Tint);
 
 public sealed record PeriodOption(string Title, ChartPeriod Period);
 
@@ -19,11 +16,14 @@ public sealed record LegendItem(int Id, string Name, string Color, string Amount
 public sealed record EarningItem(int ProjectId, string Project, string Sub, string CategoryColor,
     string DateText, string TypeText, string AmountText);
 
-/// <summary>Переход между разделами из любого экрана.</summary>
-public static class Navigator
-{
-    public static Action<int>? OpenProject;
-}
+public sealed record EventItem(int ProjectId, string Title, string Sub, string DateText, string Color, string Glyph);
+
+public sealed record RecentProject(int Id, string Name, string Client, string StatusText, string StatusColor,
+    string CategoryColor, double PaidPercent, string PercentText);
+
+public sealed record TaskItemVm(int Id, string Title, string Sub, bool IsDone, string DueColor);
+
+public sealed record ActivityItem(int? ProjectId, string Text, string Sub, string When, string Glyph, string Color);
 
 public sealed partial class DashboardViewModel : ObservableObject
 {
@@ -31,6 +31,12 @@ public sealed partial class DashboardViewModel : ObservableObject
     public ObservableCollection<StatTile> FinanceTiles { get; } = new();
     public ObservableCollection<LegendItem> Legend { get; } = new();
     public ObservableCollection<EarningItem> Earnings { get; } = new();
+    public ObservableCollection<EventItem> Events { get; } = new();
+    public ObservableCollection<RecentProject> Recent { get; } = new();
+    public ObservableCollection<TaskItemVm> MyTasks { get; } = new();
+    public ObservableCollection<ActivityItem> Activity { get; } = new();
+
+    public string Greeting => "Привет, " + ProfileService.Current.Name + "!";
 
     public IReadOnlyList<PeriodOption> Periods { get; } = new[]
     {
@@ -54,6 +60,10 @@ public sealed partial class DashboardViewModel : ObservableObject
     [ObservableProperty] private string newCategoryName = "";
     [ObservableProperty] private string earningsTitle = "Поступления";
     [ObservableProperty] private bool noEarnings = true;
+    [ObservableProperty] private bool noEvents = true;
+    [ObservableProperty] private bool noRecent = true;
+    [ObservableProperty] private bool noTasks = true;
+    [ObservableProperty] private bool noActivity = true;
 
     public bool HasFilters => SelectedCategoryId.HasValue || SelectedMonthKey.HasValue;
 
@@ -88,17 +98,20 @@ public sealed partial class DashboardViewModel : ObservableObject
             using var db = App.CreateDb();
             var s = await DashboardService.LoadAsync(db, today, period);
 
+            var (openTasks, overdueTasks) = await TaskService.CountsAsync(db, today);
             CountTiles.Clear();
-            CountTiles.Add(Count("Всего проектов", s.TotalProjects, "#6B7385"));
-            CountTiles.Add(Count("Активные", s.Active, "#2F5BEA"));
-            CountTiles.Add(Count("Завершённые", s.Completed, "#1E9E5A"));
-            CountTiles.Add(Count("На паузе", s.OnHold, "#D98A00"));
+            CountTiles.Add(UiFormat.Count("Всего проектов", s.TotalProjects, "\uE8F1", "#8A929E"));
+            CountTiles.Add(UiFormat.Count("Активных", s.Active, "\uE768", "#3B9EF0"));
+            CountTiles.Add(UiFormat.Count("Завершённых", s.Completed, "\uE73E", "#34D399"));
+            CountTiles.Add(UiFormat.Count("На паузе", s.OnHold, "\uE769", "#F5A524"));
+            CountTiles.Add(UiFormat.Count("Открытых задач", openTasks, "\uE762", "#9B8AFB"));
+            CountTiles.Add(UiFormat.Count("Просрочено", overdueTasks, "\uE7BA", "#F26D6D"));
 
             FinanceTiles.Clear();
-            FinanceTiles.Add(new("Потенциальный доход", Lines(s.Potential), "", "#2F5BEA", "#E6EDFF"));
-            FinanceTiles.Add(new("Заработано", Lines(s.Earned), "", "#1E9E5A", "#E3F5EA"));
-            FinanceTiles.Add(new("Ожидает оплаты", Lines(s.Pending), "", "#D98A00", "#FCF0D9"));
-            FinanceTiles.Add(new("Доход за месяц", Lines(s.MonthIncome), "", "#7A4DE0", "#EEE8FC"));
+            FinanceTiles.Add(UiFormat.Money("Потенциальный доход", s.Potential, "\uE1D0", "#3B9EF0"));
+            FinanceTiles.Add(UiFormat.Money("Заработано", s.Earned, "\uE73E", "#34D399"));
+            FinanceTiles.Add(UiFormat.Money("Ожидает оплаты", s.Pending, "\uE823", "#F5A524"));
+            FinanceTiles.Add(UiFormat.Money("Доход за месяц", s.MonthIncome, "\uE787", "#9B8AFB"));
 
             var keepCategory = SelectedCategoryId;
             var keepMonth = SelectedMonthKey;
@@ -128,11 +141,101 @@ public sealed partial class DashboardViewModel : ObservableObject
             SelectedMonthKey = keepMonth.HasValue && Bars.Any(b => b.Key == keepMonth) ? keepMonth : null;
             UpdateCenter();
             await RefreshEarningsAsync();
+            await LoadSideAsync(db, today);
         }
         catch (Exception ex)
         {
             Error = "Не удалось загрузить данные: " + ex.Message;
         }
+    }
+
+
+    async Task LoadSideAsync(PadDbContext db, DateOnly today)
+    {
+        var projects = await ProjectService.ListAsync(db);
+        var finished = new[] { ProjectStatus.Delivered, ProjectStatus.Completed, ProjectStatus.Cancelled };
+
+        Events.Clear();
+        var items = new List<(DateOnly Date, EventItem Item)>();
+        foreach (var p in projects.Where(p => p.Deadline.HasValue && !finished.Contains(p.Status)))
+        {
+            var d = p.Deadline!.Value;
+            var late = d < today;
+            items.Add((d, new EventItem(p.Id, "Срок: " + p.Name, string.IsNullOrWhiteSpace(p.Client) ? "Без заказчика" : p.Client,
+                DayText(d, today), late ? "#F26D6D" : "#3B9EF0", "\uE787")));
+        }
+        var overview = await FinanceOverviewService.LoadAsync(db, today);
+        foreach (var e in overview.Expected.Where(e => e.Due.HasValue))
+            items.Add((e.Due!.Value, new EventItem(e.ProjectId, "Оплата: " + e.Project,
+                "Ожидается " + UiFormat.Fmt(e.Remaining) + " " + e.Currency, DayText(e.Due.Value, today),
+                e.Status == ExpectedStatus.Overdue ? "#F26D6D" : "#F5A524", "\uE1D0")));
+        foreach (var (_, item) in items.OrderBy(i => i.Date).Take(5)) Events.Add(item);
+        NoEvents = Events.Count == 0;
+
+        Recent.Clear();
+        foreach (var r in projects.Take(5))
+        {
+            var pct = r.Price > 0 ? (double)Math.Clamp(r.Received / r.Price * 100m, 0m, 100m) : 0;
+            Recent.Add(new RecentProject(r.Id, r.Name, string.IsNullOrWhiteSpace(r.Client) ? "Без заказчика" : r.Client,
+                Ru.Status(r.Status), Ru.StatusColor(r.Status), r.CategoryColor, pct, Math.Round(pct) + " %"));
+        }
+        NoRecent = Recent.Count == 0;
+
+        await LoadTasksAsync(db, today);
+
+        Activity.Clear();
+        foreach (var a in await ActivityService.RecentAsync(db, 6))
+        {
+            var (glyph, color) = a.Kind switch
+            {
+                ActivityKind.Payment => ("\uE1D0", "#34D399"),
+                ActivityKind.Delivery => ("\uE73E", "#19C3A6"),
+                ActivityKind.Task => ("\uE762", "#9B8AFB"),
+                ActivityKind.Status => ("\uE72C", "#3B9EF0"),
+                _ => ("\uE710", "#8A929E"),
+            };
+            Activity.Add(new ActivityItem(a.ProjectId, a.Text, a.Sub, a.When.ToString("dd.MM HH:mm"), glyph, color));
+        }
+        NoActivity = Activity.Count == 0;
+    }
+
+    async Task LoadTasksAsync(PadDbContext db, DateOnly today)
+    {
+        MyTasks.Clear();
+        foreach (var t in (await TaskService.ListAsync(db, today, TaskFilter.Open)).Take(5))
+            MyTasks.Add(new TaskItemVm(t.Id, t.Title,
+                (t.Project is null ? "" : t.Project + " · ") + (t.Due.HasValue ? "до " + t.Due.Value.ToString("dd.MM") : "без срока"),
+                false, t.IsOverdue ? "#F26D6D" : "#8A929E"));
+        NoTasks = MyTasks.Count == 0;
+    }
+
+    [RelayCommand]
+    private async Task CompleteTaskAsync(int id)
+    {
+        try
+        {
+            using var db = App.CreateDb();
+            await TaskService.SetStatusAsync(db, id, WorkStatus.Done);
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            await LoadTasksAsync(db, today);
+            var (open, overdue) = await TaskService.CountsAsync(db, today);
+            CountTiles[4] = UiFormat.Count("Открытых задач", open, "\uE762", "#9B8AFB");
+            CountTiles[5] = UiFormat.Count("Просрочено", overdue, "\uE7BA", "#F26D6D");
+        }
+        catch (Exception ex) { Error = ex.Message; }
+    }
+
+    static string DayText(DateOnly d, DateOnly today)
+    {
+        var n = d.DayNumber - today.DayNumber;
+        var date = d.ToString("d MMM", CultureInfo.CurrentCulture);
+        return n switch
+        {
+            0 => "Сегодня",
+            1 => "Завтра",
+            < 0 => date + " · просрочено на " + (-n) + " дн.",
+            _ => date,
+        };
     }
 
     async Task RefreshEarningsAsync()
@@ -212,18 +315,9 @@ public sealed partial class DashboardViewModel : ObservableObject
         }
     }
 
-    static StatTile Count(string label, int n, string accent) =>
-        new(label, new[] { new MoneyLine(n.ToString(), "") }, "", accent, "#FFFFFF");
+    static string Fmt(decimal v) => UiFormat.Fmt(v);
 
-    /// <summary>Валюты не смешиваются: каждая показывается отдельной строкой.</summary>
-    static IReadOnlyList<MoneyLine> Lines(IReadOnlyDictionary<string, decimal> d) =>
-        d.Count == 0
-            ? new[] { new MoneyLine("0", "EUR") }
-            : d.OrderBy(kv => kv.Key).Select(kv => new MoneyLine(Fmt(kv.Value), kv.Key)).ToList();
-
-    static string Fmt(decimal v) => v.ToString("#,##0.##", CultureInfo.CurrentCulture);
-
-    static string Pct(decimal p) => p.ToString("0.#", CultureInfo.CurrentCulture) + " %";
+    static string Pct(decimal p) => UiFormat.Pct(p);
 
     static string Capitalize(string s) => s.Length == 0 ? s : char.ToUpper(s[0], CultureInfo.CurrentCulture) + s[1..];
 }

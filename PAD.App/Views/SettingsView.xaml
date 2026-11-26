@@ -5,8 +5,16 @@
         <StackPanel Margin="8,22,28,24" MaxWidth="820" HorizontalAlignment="Left">
             <TextBlock Text="Настройки" Style="{StaticResource PageTitle}"/>
 
+            <TextBlock Text="ВНЕШНИЙ ВИД" Style="{StaticResource SectionTitle}"/>
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <CheckBox IsChecked="{Binding IsDark}" Content="Тёмная тема" FontSize="14"/>
+                    <TextBlock Text="Выключите, чтобы использовать светлую тему." FontSize="12" Foreground="{DynamicResource TextMutedBrush}" Margin="22,4,0,0"/>
+                </StackPanel>
+            </Border>
+
             <TextBlock Text="ХРАНИЛИЩЕ" Style="{StaticResource SectionTitle}"/>
-            <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="14" Padding="22">
+            <Border Style="{StaticResource Card}">
                 <StackPanel>
                     <TextBlock Text="Все данные хранятся только на этом компьютере. Интернет и аккаунт не нужны."
                                TextWrapping="Wrap" Foreground="{DynamicResource TextMutedBrush}"/>
@@ -28,13 +36,13 @@
             </Border>
 
             <TextBlock Text="РЕЗЕРВНЫЕ КОПИИ" Style="{StaticResource SectionTitle}"/>
-            <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="14" Padding="22">
+            <Border Style="{StaticResource Card}">
                 <StackPanel>
                     <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource TextMutedBrush}"
                                Text="PAD автоматически делает копию раз в день при запуске и хранит последние 7. Копия — это ZIP со всеми проектами, платежами, категориями и настройками."/>
                     <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
                         <Button Style="{StaticResource AccentButton}" Command="{Binding CreateBackupCommand}">
-                            <TextBlock Text="Создать копию…" Foreground="White" FontWeight="Medium"/>
+                            <TextBlock Text="Создать копию…" Foreground="{DynamicResource AccentTextBrush}" FontWeight="Medium"/>
                         </Button>
                         <Button Style="{StaticResource GhostButton}" Command="{Binding RestoreCommand}" Margin="8,0,0,0">
                             <TextBlock Text="Восстановить из копии…"/>
@@ -52,7 +60,7 @@
             </Border>
 
             <TextBlock Text="ЭКСПОРТ" Style="{StaticResource SectionTitle}"/>
-            <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="14" Padding="22">
+            <Border Style="{StaticResource Card}">
                 <StackPanel>
                     <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource TextMutedBrush}"
                                Text="История всех платежей в CSV: открывается в Excel. Возвраты — отрицательные суммы."/>

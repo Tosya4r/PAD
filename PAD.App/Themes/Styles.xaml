@@ -6,23 +6,47 @@
         <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI"/>
     </Style>
 
-    <Style x:Key="PageTitle" TargetType="TextBlock">
+    <Style TargetType="CheckBox">
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+
+    <Style x:Key="PageTitle" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
         <Setter Property="FontSize" Value="28"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
     </Style>
 
-    <Style x:Key="SectionTitle" TargetType="TextBlock">
+    <Style x:Key="SectionTitle" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
         <Setter Property="Margin" Value="2,22,0,10"/>
     </Style>
 
+    <Style x:Key="CardTitle" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+
+    <Style x:Key="FieldLabel" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
+        <Setter Property="Margin" Value="0,12,0,4"/>
+    </Style>
+
+    <Style x:Key="Card" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="14"/>
+        <Setter Property="Padding" Value="20"/>
+    </Style>
+
     <Style x:Key="NavItem" TargetType="ListBoxItem">
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListBoxItem">
-                    <Border x:Name="Bd" Background="Transparent" CornerRadius="10" Padding="8,7" Margin="8,1">
+                    <Border x:Name="Bd" Background="Transparent" CornerRadius="10" Padding="12,10" Margin="10,1">
                         <ContentPresenter/>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -38,31 +62,34 @@
         </Setter>
     </Style>
 
-    <!-- Компактная ячейка счётчика -->
+    <!-- Карточка-счётчик: значок, число, подпись -->
     <DataTemplate x:Key="CountTemplate">
-        <StackPanel Margin="22,16,12,16">
-            <StackPanel Orientation="Horizontal">
-                <Border Width="8" Height="8" CornerRadius="4" Background="{Binding Accent}" VerticalAlignment="Center"/>
-                <TextBlock Text="{Binding Label}" Foreground="{DynamicResource TextMutedBrush}" FontSize="12.5" Margin="8,0,0,0"/>
+        <Border Style="{StaticResource Card}" Margin="0,0,12,0" Padding="16,14">
+            <StackPanel>
+                <TextBlock Text="{Binding Glyph}" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="{Binding Accent}"/>
+                <ItemsControl ItemsSource="{Binding Lines}" Margin="0,8,0,0">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Amount}" FontSize="26" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding Unit}" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" Margin="5,0,0,4" VerticalAlignment="Bottom"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock Text="{Binding Label}" Foreground="{DynamicResource TextMutedBrush}" FontSize="12.5"/>
             </StackPanel>
-            <ItemsControl ItemsSource="{Binding Lines}" Margin="0,6,0,0">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Amount}" FontSize="28" FontWeight="SemiBold"/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </StackPanel>
+        </Border>
     </DataTemplate>
 
-    <!-- Крупная денежная плитка: тонированный фон, цветной значок, крупная сумма -->
+    <!-- Крупная денежная плитка -->
     <DataTemplate x:Key="MoneyTileTemplate">
-        <Border Background="{Binding Tint}" CornerRadius="14" Padding="18,16" Margin="0,0,14,0" MinHeight="136">
+        <Border Background="{Binding Tint}" CornerRadius="14" Padding="18,16" Margin="0,0,14,0" MinHeight="130">
             <DockPanel>
                 <Border DockPanel.Dock="Top" Width="34" Height="34" CornerRadius="10"
                         Background="{Binding Accent}" HorizontalAlignment="Left">
                     <TextBlock Text="{Binding Glyph}" FontFamily="Segoe MDL2 Assets" FontSize="16"
-                               Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                               Foreground="{DynamicResource AccentTextBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
                 <TextBlock DockPanel.Dock="Top" Text="{Binding Label}" FontSize="13" FontWeight="Medium"
                            Foreground="{DynamicResource TextMutedBrush}" Margin="0,14,0,4"/>
@@ -70,10 +97,9 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding Amount}" FontSize="30" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding Amount}" FontSize="28" FontWeight="SemiBold"/>
                                 <TextBlock Text="{Binding Unit}" FontSize="14" FontWeight="Medium"
-                                           Foreground="{DynamicResource TextMutedBrush}"
-                                           Margin="6,0,0,6" VerticalAlignment="Bottom"/>
+                                           Foreground="{DynamicResource TextMutedBrush}" Margin="6,0,0,5" VerticalAlignment="Bottom"/>
                             </StackPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
@@ -82,7 +108,29 @@
         </Border>
     </DataTemplate>
 
-    <!-- Сегментированный переключатель периода -->
+    <!-- Компактная плитка для карточки «Финансы» -->
+    <DataTemplate x:Key="MiniTileTemplate">
+        <Border Background="{Binding Tint}" CornerRadius="10" Padding="12,10" Margin="0,0,8,0">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding Glyph}" FontFamily="Segoe MDL2 Assets" FontSize="13" Foreground="{Binding Accent}" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding Label}" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" Margin="6,0,0,0"/>
+                </StackPanel>
+                <ItemsControl ItemsSource="{Binding Lines}" Margin="0,6,0,0">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Amount}" FontSize="18" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding Unit}" FontSize="12" Foreground="{DynamicResource TextMutedBrush}"
+                                           Margin="4,0,0,2" VerticalAlignment="Bottom"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+    </DataTemplate>
+
     <Style x:Key="Chip" TargetType="ListBoxItem">
         <Setter Property="Template">
             <Setter.Value>
@@ -100,7 +148,6 @@
         </Setter>
     </Style>
 
-    <!-- Строка легенды диаграммы -->
     <Style x:Key="LegendRow" TargetType="ListBoxItem">
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         <Setter Property="Cursor" Value="Hand"/>
@@ -126,12 +173,27 @@
     <Style x:Key="Input" TargetType="TextBox">
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+        <Setter Property="CaretBrush" Value="{DynamicResource TextBrush}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
-                    <Border Background="{DynamicResource HoverBrush}" CornerRadius="8" Padding="10,8">
+                    <Border Background="{DynamicResource HoverBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1"
+                            CornerRadius="8" Padding="10,8">
                         <ScrollViewer x:Name="PART_ContentHost"/>
                     </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="BareInput" TargetType="TextBox">
+        <Setter Property="FontSize" Value="13.5"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+        <Setter Property="CaretBrush" Value="{DynamicResource TextBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -142,7 +204,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="Bd" Background="{DynamicResource AccentBrush}" CornerRadius="8" Padding="14,8">
+                    <Border x:Name="Bd" Background="{DynamicResource AccentBrush}" CornerRadius="9" Padding="16,9">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -154,18 +216,12 @@
         </Setter>
     </Style>
 
-    <Style x:Key="FieldLabel" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
-        <Setter Property="FontSize" Value="12"/>
-        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
-        <Setter Property="Margin" Value="0,12,0,4"/>
-    </Style>
-
     <Style x:Key="GhostButton" TargetType="Button">
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="Bd" Background="{DynamicResource HoverBrush}" CornerRadius="8" Padding="14,8">
+                    <Border x:Name="Bd" Background="{DynamicResource HoverBrush}" CornerRadius="9" Padding="14,9">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -190,6 +246,65 @@
                             <Setter TargetName="Bd" Property="Background" Value="{DynamicResource HoverBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ComboBoxItem">
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBoxItem">
+                    <Border x:Name="Bd" Padding="10,7" CornerRadius="6" Background="Transparent">
+                        <ContentPresenter TextElement.Foreground="{DynamicResource TextBrush}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource HoverBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SelectedBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ComboBox">
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="MinHeight" Value="34"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBox">
+                    <Grid>
+                        <ToggleButton x:Name="Tg" Focusable="False" ClickMode="Press"
+                                      IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Border Background="{DynamicResource HoverBrush}" BorderBrush="{DynamicResource LineBrush}"
+                                            BorderThickness="1" CornerRadius="8"/>
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+                        </ToggleButton>
+                        <ContentPresenter IsHitTestVisible="False" Margin="10,0,30,0" VerticalAlignment="Center"
+                                          Content="{TemplateBinding SelectionBoxItem}"
+                                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                          TextElement.Foreground="{DynamicResource TextBrush}"/>
+                        <Path IsHitTestVisible="False" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0"
+                              Data="M0,0 L4,4 L8,0" Stroke="{DynamicResource TextMutedBrush}" StrokeThickness="1.5"/>
+                        <Popup IsOpen="{TemplateBinding IsDropDownOpen}" Placement="Bottom" AllowsTransparency="True"
+                               Focusable="False" PopupAnimation="Fade">
+                            <Border MinWidth="{Binding ActualWidth, ElementName=Tg}" Margin="0,4,0,8" Padding="4"
+                                    Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}"
+                                    BorderThickness="1" CornerRadius="8">
+                                <ScrollViewer MaxHeight="260"><ItemsPresenter/></ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

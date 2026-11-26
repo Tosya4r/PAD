@@ -3,68 +3,72 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:PAD.Desktop.ViewModels"
         xmlns:views="clr-namespace:PAD.Desktop.Views"
-        Title="PAD — Personal Administration Desk" Width="1280" Height="800" MinWidth="960" MinHeight="600"
+        Title="PAD — Personal Administration Desk" Width="1360" Height="840" MinWidth="1100" MinHeight="640"
+        Icon="Assets/pad.ico"
         Background="{DynamicResource WindowBrush}">
     <Window.Resources>
-        <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
-            <views:DashboardView/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:ProjectsViewModel}">
-            <views:ProjectsView/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
-            <views:SettingsView/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:PlaceholderViewModel}">
-            <StackPanel Margin="8,22,28,24">
-                <TextBlock Text="{Binding Title}" Style="{StaticResource PageTitle}"/>
-                <TextBlock Text="{Binding Text}" Foreground="{DynamicResource TextMutedBrush}" Margin="0,6,0,0"/>
-            </StackPanel>
-        </DataTemplate>
+        <BooleanToVisibilityConverter x:Key="B2V"/>
+        <DataTemplate DataType="{x:Type vm:DashboardViewModel}"><views:DashboardView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ProjectsViewModel}"><views:ProjectsView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SettingsViewModel}"><views:SettingsView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:TasksViewModel}"><views:TasksView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:FinanceViewModel}"><views:FinanceView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ArchiveViewModel}"><views:ArchiveView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ProfileViewModel}"><views:ProfileView/></DataTemplate>
     </Window.Resources>
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="240"/>
+            <ColumnDefinition Width="230"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Боковая панель — отдельная карточка -->
-        <Border Margin="12" Background="{DynamicResource SidebarBrush}" CornerRadius="16">
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.08" Color="#101828"/>
-            </Border.Effect>
+        <!-- Боковая панель -->
+        <Border Background="{DynamicResource SidebarBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,1,0">
             <DockPanel>
-                <StackPanel DockPanel.Dock="Bottom" Margin="20,8,16,16">
-                    <TextBlock Text="Данные хранятся только на этом компьютере" FontSize="11"
-                               Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap"
-                               ToolTip="{Binding StoragePath}"/>
-                    <TextBlock Text="{Binding Version}" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,4,0,0"/>
+                <StackPanel DockPanel.Dock="Bottom">
+                    <!-- Карточка профиля -->
+                    <Button Style="{StaticResource RowButton}" Command="{Binding OpenProfileCommand}" Margin="10,0" ToolTip="Открыть профиль">
+                        <StackPanel Orientation="Horizontal">
+                            <Grid Width="38" Height="38">
+                                <Ellipse Fill="{DynamicResource AccentBrush}"/>
+                                <TextBlock Text="{Binding UserInitial}" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource AccentTextBrush}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <Ellipse Visibility="{Binding HasAvatar, Converter={StaticResource B2V}}">
+                                    <Ellipse.Fill><ImageBrush ImageSource="{Binding Avatar}" Stretch="UniformToFill"/></Ellipse.Fill>
+                                </Ellipse>
+                            </Grid>
+                            <StackPanel Margin="10,0,0,0" VerticalAlignment="Center" MaxWidth="140">
+                                <TextBlock Text="{Binding UserName}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Text="{Binding UserRole}" FontSize="11.5" Foreground="{DynamicResource TextMutedBrush}" TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Button>
+                    <StackPanel Margin="20,10,16,16">
+                        <TextBlock Text="Данные хранятся только на этом компьютере" FontSize="11" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextMutedBrush}" ToolTip="{Binding StoragePath}"/>
+                        <TextBlock FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,4,0,0">
+                            <Run Text="{Binding Version, Mode=OneWay}"/><Run Text="  ·  "/><Run Text="{Binding DbSize, Mode=OneWay}"/>
+                        </TextBlock>
+                    </StackPanel>
                 </StackPanel>
 
-                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="18,20,0,16">
-                    <Border Width="34" Height="34" CornerRadius="10" Background="{DynamicResource AccentBrush}">
-                        <TextBlock Text="P" Foreground="White" FontSize="18" FontWeight="Bold"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="18,20,0,18">
+                    <Image Source="Assets/pad-logo.png" Width="38" Height="38"/>
                     <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
-                        <TextBlock Text="PAD" FontSize="16" FontWeight="Bold"/>
+                        <TextBlock Text="PAD" FontSize="17" FontWeight="Bold"/>
                         <TextBlock Text="Personal Administration Desk" FontSize="9.5" Foreground="{DynamicResource TextMutedBrush}"/>
                     </StackPanel>
                 </StackPanel>
 
                 <ListBox ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}"
-                         Background="Transparent" BorderThickness="0"
-                         ItemContainerStyle="{StaticResource NavItem}">
+                         Background="Transparent" BorderThickness="0" ItemContainerStyle="{StaticResource NavItem}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <Border Width="28" Height="28" CornerRadius="8" Background="{Binding Color}">
-                                    <TextBlock Text="{Binding Glyph}" FontFamily="Segoe MDL2 Assets" FontSize="14"
-                                               Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <TextBlock Text="{Binding Title}" FontSize="13.5" FontWeight="Medium"
-                                           Margin="12,0,0,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Glyph}" FontFamily="Segoe MDL2 Assets" FontSize="16" Width="22"
+                                           Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Title}" FontSize="13.5" FontWeight="Medium" Margin="10,0,0,0" VerticalAlignment="Center"/>
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
@@ -72,6 +76,34 @@
             </DockPanel>
         </Border>
 
-        <ContentControl Grid.Column="1" Content="{Binding CurrentPage}"/>
+        <DockPanel Grid.Column="1">
+            <!-- Верхняя панель -->
+            <Grid DockPanel.Dock="Top" Margin="24,16,28,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="1"
+                        CornerRadius="10" Padding="12,0" Height="40" MaxWidth="460" HorizontalAlignment="Left">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Left" Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                   Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBox Style="{StaticResource BareInput}" Width="380" VerticalContentAlignment="Center"
+                                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                 ToolTip="Поиск проектов по названию, заказчику и описанию. Enter — найти">
+                            <TextBox.InputBindings><KeyBinding Key="Enter" Command="{Binding RunSearchCommand}"/></TextBox.InputBindings>
+                        </TextBox>
+                    </DockPanel>
+                </Border>
+                <StackPanel Grid.Column="1" Margin="0,0,20,0" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <TextBlock Text="{Binding TimeText}" FontSize="16" FontWeight="SemiBold" TextAlignment="Right"/>
+                    <TextBlock Text="{Binding DateText}" FontSize="11.5" Foreground="{DynamicResource TextMutedBrush}" TextAlignment="Right"/>
+                </StackPanel>
+                <Button Grid.Column="2" Style="{StaticResource AccentButton}" Command="{Binding NewProjectCommand}" Height="40">
+                    <TextBlock Text="+  Создать проект" Foreground="{DynamicResource AccentTextBrush}" FontWeight="SemiBold"/>
+                </Button>
+            </Grid>
+
+            <ContentControl Content="{Binding CurrentPage}"/>
+        </DockPanel>
     </Grid>
 </Window>

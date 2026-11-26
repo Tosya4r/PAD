@@ -1,15 +1,13 @@
+using System.IO;
+using System.Windows.Media;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using PAD.Desktop.Services;
 
 namespace PAD.Desktop.ViewModels;
 
-public sealed record NavItem(string Title, string Glyph, string Color, Func<ObservableObject> Create);
-
-public sealed partial class PlaceholderViewModel : ObservableObject
-{
-    public string Title { get; }
-    public string Text { get; }
-    public PlaceholderViewModel(string title, string text) { Title = title; Text = text; }
-}
+public sealed record NavItem(string Title, string Glyph, Func<ObservableObject> Create);
 
 public sealed partial class MainViewModel : ObservableObject
 {
@@ -19,44 +17,106 @@ public sealed partial class MainViewModel : ObservableObject
 
     [ObservableProperty] private NavItem? selected;
     [ObservableProperty] private ObservableObject? currentPage;
+    [ObservableProperty] private string searchText = "";
+    [ObservableProperty] private string timeText = "";
+    [ObservableProperty] private string dateText = "";
+    [ObservableProperty] private string userName = "";
+    [ObservableProperty] private string userRole = "";
+    [ObservableProperty] private string userInitial = "P";
+    [ObservableProperty, NotifyPropertyChangedFor(nameof(HasAvatar))] private ImageSource? avatar;
+    [ObservableProperty] private string dbSize = "";
+
+    public bool HasAvatar => Avatar is not null;
+
+    int? _pendingProjectId;
+    string? _pendingSearch;
+    bool _pendingCreate;
 
     public MainViewModel()
     {
-        static NavItem Stub(string title, string glyph, string color) =>
-            new(title, glyph, color, () => new PlaceholderViewModel(title, "Раздел в разработке."));
-
         Items = new NavItem[]
         {
-            new("Главная", "", "#2F5BEA", () => new DashboardViewModel()),
-            new("Мои проекты", "", "#6B5CE7", () => TakeProjects()),
-            Stub("Задачи", "", "#1E9E5A"),
-            Stub("Календарь", "", "#E5484D"),
-            Stub("Финансы", "", "#12A594"),
-            Stub("База знаний", "", "#D98A00"),
-            Stub("Архив", "", "#7A8190"),
-            Stub("Шаблоны", "", "#D6409F"),
-            Stub("Мой профиль", "", "#3E8EED"),
-            new("Настройки", "", "#7A8190", () => new SettingsViewModel()),
+            new("Главная", "", () => new DashboardViewModel()),
+            new("Мои проекты", "", () => TakeProjects()),
+            new("Задачи", "", () => new TasksViewModel()),
+            new("Финансы", "", () => new FinanceViewModel()),
+            new("Архив", "", () => new ArchiveViewModel()),
+            new("Настройки", "", () => new SettingsViewModel()),
         };
+
         Navigator.OpenProject = OpenProject;
+        Navigator.Search = text => { _pendingSearch = text; Go(1); };
+        Navigator.NewProject = () => { _pendingCreate = true; Go(1); };
+
+        ProfileService.Changed += RefreshProfile;
+        RefreshProfile();
+
+        var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(15) };
+        timer.Tick += (_, _) => Tick();
+        timer.Start();
+        Tick();
+
         Selected = Items[0];
     }
 
-    int? _pendingProjectId;
+    void Tick()
+    {
+        var now = DateTime.Now;
+        TimeText = now.ToString("HH:mm");
+        var d = now.ToString("dddd, d MMMM", System.Globalization.CultureInfo.CurrentCulture);
+        DateText = d.Length == 0 ? d : char.ToUpper(d[0]) + d[1..];
+    }
+
+    void RefreshProfile()
+    {
+        var p = ProfileService.Current;
+        UserName = p.Name;
+        UserRole = p.Role;
+        UserInitial = string.IsNullOrWhiteSpace(p.Name) ? "P" : p.Name.Trim()[..1].ToUpperInvariant();
+        Avatar = ProfileService.LoadAvatar();
+        try { DbSize = File.Exists(App.DbPath) ? (new FileInfo(App.DbPath).Length / 1024.0 / 1024.0).ToString("0.0") + " МБ" : ""; }
+        catch { DbSize = ""; }
+    }
 
     ProjectsViewModel TakeProjects()
     {
-        var vm = new ProjectsViewModel(_pendingProjectId);
+        var vm = new ProjectsViewModel(_pendingProjectId, _pendingSearch, _pendingCreate);
         _pendingProjectId = null;
+        _pendingSearch = null;
+        _pendingCreate = false;
         return vm;
+    }
+
+    void Go(int index)
+    {
+        var item = Items[index];
+        if (Selected == item) Selected = null;
+        Selected = item;
     }
 
     void OpenProject(int id)
     {
         _pendingProjectId = id;
-        var projects = Items[1];
-        if (Selected == projects) Selected = null;
-        Selected = projects;
+        Go(1);
+    }
+
+    [RelayCommand]
+    private void RunSearch()
+    {
+        var text = SearchText.Trim();
+        if (text.Length == 0) return;
+        Navigator.Search?.Invoke(text);
+        SearchText = "";
+    }
+
+    [RelayCommand]
+    private void NewProject() => Navigator.NewProject?.Invoke();
+
+    [RelayCommand]
+    private void OpenProfile()
+    {
+        Selected = null;
+        CurrentPage = new ProfileViewModel();
     }
 
     partial void OnSelectedChanged(NavItem? value)
@@ -65,5 +125,6 @@ public sealed partial class MainViewModel : ObservableObject
         var page = value.Create();
         CurrentPage = page;
         if (page is DashboardViewModel d) _ = d.LoadAsync();
+        RefreshProfile();
     }
 }

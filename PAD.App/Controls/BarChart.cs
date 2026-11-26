@@ -32,12 +32,20 @@ public sealed class BarChart : FrameworkElement
     }
 
     const double L = 8, R = 8, T = 14, B = 28;
-    static readonly Brush Accent = Frozen(Color.FromRgb(0x2F, 0x5B, 0xEA));
-    static readonly Brush Empty = Frozen(Color.FromRgb(0xE1, 0xE5, 0xEC));
-    static readonly Brush Muted = Frozen(Color.FromRgb(0x6B, 0x73, 0x85));
+    static readonly Brush FbAccent = Frozen(Color.FromRgb(0x19, 0xC3, 0xA6));
+    static readonly Brush FbEmpty = Frozen(Color.FromRgb(0x2A, 0x2F, 0x37));
+    static readonly Brush FbMuted = Frozen(Color.FromRgb(0x8A, 0x92, 0x9E));
+    static readonly Brush FbText = Frozen(Color.FromRgb(0xE8, 0xEB, 0xEF));
     int _hover = -1;
 
-    public BarChart() => Cursor = Cursors.Hand;
+    public BarChart()
+    {
+        Cursor = Cursors.Hand;
+        Loaded += (_, _) => PAD.Desktop.Services.ThemeService.ThemeChanged += OnTheme;
+        Unloaded += (_, _) => PAD.Desktop.Services.ThemeService.ThemeChanged -= OnTheme;
+    }
+
+    void OnTheme() => InvalidateVisual();
 
     static Brush Frozen(Color c) { var b = new SolidColorBrush(c); b.Freeze(); return b; }
 
@@ -46,6 +54,10 @@ public sealed class BarChart : FrameworkElement
         dc.DrawRectangle(Brushes.Transparent, null, new Rect(0, 0, ActualWidth, ActualHeight));
         var bars = Bars;
         if (bars is null || bars.Count == 0 || ActualWidth < 60) return;
+        var Accent = PAD.Desktop.Services.ThemeService.Brush("AccentBrush", FbAccent);
+        var Empty = PAD.Desktop.Services.ThemeService.Brush("LineBrush", FbEmpty);
+        var Muted = PAD.Desktop.Services.ThemeService.Brush("TextMutedBrush", FbMuted);
+        var Strong = PAD.Desktop.Services.ThemeService.Brush("TextBrush", FbText);
 
         double w = ActualWidth - L - R, h = ActualHeight - T - B;
         var slot = w / bars.Count;
@@ -72,7 +84,7 @@ public sealed class BarChart : FrameworkElement
             if (slot >= 26 || i % 2 == 0)
             {
                 var ft = new FormattedText(b.Label, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-                    new Typeface("Segoe UI"), 11, selected || i == _hover ? Brushes.Black : Muted, dpi);
+                    new Typeface("Segoe UI"), 11, selected || i == _hover ? Strong : Muted, dpi);
                 dc.DrawText(ft, new Point(L + slot * i + (slot - ft.Width) / 2, T + h + 7));
             }
         }

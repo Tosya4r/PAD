@@ -30,7 +30,14 @@ public sealed class DonutChart : FrameworkElement
         set => SetValue(SelectedIdProperty, value);
     }
 
-    public DonutChart() => Cursor = Cursors.Hand;
+    public DonutChart()
+    {
+        Cursor = Cursors.Hand;
+        Loaded += (_, _) => PAD.Desktop.Services.ThemeService.ThemeChanged += OnTheme;
+        Unloaded += (_, _) => PAD.Desktop.Services.ThemeService.ThemeChanged -= OnTheme;
+    }
+
+    void OnTheme() => InvalidateVisual();
 
     static readonly Brush EmptyBrush = Freeze(new SolidColorBrush(Color.FromRgb(0xE6, 0xE9, 0xF0)));
 
@@ -60,7 +67,7 @@ public sealed class DonutChart : FrameworkElement
 
         if (slices.Count == 0)
         {
-            dc.DrawEllipse(null, new Pen(EmptyBrush, thick), c, r, r);
+            dc.DrawEllipse(null, new Pen(PAD.Desktop.Services.ThemeService.Brush("LineBrush", EmptyBrush), thick), c, r, r);
             return;
         }
 

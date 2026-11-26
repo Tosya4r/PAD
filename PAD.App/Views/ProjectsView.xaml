@@ -16,7 +16,7 @@
             <DockPanel DockPanel.Dock="Top" Margin="0,0,0,14">
                 <Button DockPanel.Dock="Right" Style="{StaticResource AccentButton}" Command="{Binding NewProjectCommand}"
                         VerticalAlignment="Center">
-                    <TextBlock Text="+ Проект" Foreground="White" FontWeight="Medium"/>
+                    <TextBlock Text="+ Проект" Foreground="{DynamicResource AccentTextBrush}" FontWeight="Medium"/>
                 </Button>
                 <TextBlock Text="Проекты" Style="{StaticResource PageTitle}"/>
             </DockPanel>
@@ -98,7 +98,7 @@
                                  Text="{Binding NewDescription, UpdateSourceTrigger=PropertyChanged}"/>
                         <StackPanel Orientation="Horizontal" Margin="0,18,0,0">
                             <Button Style="{StaticResource AccentButton}" Command="{Binding CreateProjectCommand}">
-                                <TextBlock Text="Создать проект" Foreground="White" FontWeight="Medium"/>
+                                <TextBlock Text="Создать проект" Foreground="{DynamicResource AccentTextBrush}" FontWeight="Medium"/>
                             </Button>
                             <Button Style="{StaticResource GhostButton}" Command="{Binding CancelCreateCommand}" Margin="8,0,0,0">
                                 <TextBlock Text="Отмена"/>
@@ -109,7 +109,7 @@
 
                 <!-- Карточка проекта -->
                 <StackPanel Visibility="{Binding ShowDetail, Converter={StaticResource B2V}}">
-                    <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="14" Padding="22">
+                    <Border Style="{StaticResource Card}">
                         <StackPanel>
                             <TextBlock Text="{Binding DetailName}" FontSize="24" FontWeight="SemiBold" TextWrapping="Wrap"/>
                             <TextBlock Text="{Binding DetailSub}" Foreground="{DynamicResource TextMutedBrush}" Margin="0,4,0,0"/>
@@ -132,7 +132,10 @@
                     <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
                         <Button Style="{StaticResource AccentButton}" Command="{Binding OpenDeliveryCommand}"
                                 Visibility="{Binding CanDeliver, Converter={StaticResource B2V}}">
-                            <TextBlock Text="Зафиксировать сдачу" Foreground="White" FontWeight="Medium"/>
+                            <TextBlock Text="Зафиксировать сдачу" Foreground="{DynamicResource AccentTextBrush}" FontWeight="Medium"/>
+                        </Button>
+                        <Button Style="{StaticResource GhostButton}" Command="{Binding ArchiveCommand}" Margin="0,0,8,0">
+                            <TextBlock Text="В архив"/>
                         </Button>
                         <Button Style="{StaticResource GhostButton}" Command="{Binding ReopenCommand}"
                                 Visibility="{Binding CanReopen, Converter={StaticResource B2V}}">
@@ -166,7 +169,7 @@
                                      Text="{Binding DelivComment, UpdateSourceTrigger=PropertyChanged}"/>
                             <StackPanel Orientation="Horizontal" Margin="0,18,0,0">
                                 <Button Style="{StaticResource AccentButton}" Command="{Binding ConfirmDeliveryCommand}">
-                                    <TextBlock Text="Подтвердить сдачу" Foreground="White" FontWeight="Medium"/>
+                                    <TextBlock Text="Подтвердить сдачу" Foreground="{DynamicResource AccentTextBrush}" FontWeight="Medium"/>
                                 </Button>
                                 <Button Style="{StaticResource GhostButton}" Command="{Binding CancelDeliveryCommand}" Margin="8,0,0,0">
                                     <TextBlock Text="Отмена"/>
@@ -177,7 +180,7 @@
 
                     <!-- Платежи -->
                     <TextBlock Text="ПЛАТЕЖИ" Style="{StaticResource SectionTitle}"/>
-                    <Border Background="{DynamicResource SurfaceBrush}" CornerRadius="14" Padding="22">
+                    <Border Style="{StaticResource Card}">
                         <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -203,7 +206,7 @@
                             </Grid>
                             <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
                                 <Button Style="{StaticResource AccentButton}" Command="{Binding AddPaymentCommand}">
-                                    <TextBlock Text="Добавить платёж" Foreground="White" FontWeight="Medium"/>
+                                    <TextBlock Text="Добавить платёж" Foreground="{DynamicResource AccentTextBrush}" FontWeight="Medium"/>
                                 </Button>
                                 <CheckBox Content="Деньги получены" IsChecked="{Binding PayIsReceived}" Margin="16,0,0,0" VerticalAlignment="Center"/>
                             </StackPanel>

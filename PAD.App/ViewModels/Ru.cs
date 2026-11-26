@@ -19,14 +19,14 @@ public static class Ru
 
     public static string StatusColor(ProjectStatus s) => s switch
     {
-        ProjectStatus.InProgress => "#2F5BEA",
-        ProjectStatus.WaitingStart => "#6E56CF",
-        ProjectStatus.OnHold => "#D98A00",
-        ProjectStatus.InReview => "#00A2C7",
-        ProjectStatus.Delivered => "#12A594",
-        ProjectStatus.Completed => "#1E9E5A",
-        ProjectStatus.Cancelled => "#D13C3C",
-        _ => "#6B7385",
+        ProjectStatus.InProgress => "#3B9EF0",
+        ProjectStatus.WaitingStart => "#9B8AFB",
+        ProjectStatus.OnHold => "#F5A524",
+        ProjectStatus.InReview => "#22B8CF",
+        ProjectStatus.Delivered => "#19C3A6",
+        ProjectStatus.Completed => "#34D399",
+        ProjectStatus.Cancelled => "#F26D6D",
+        _ => "#8A929E",
     };
 
     public static string Pay(PaymentStatus s) => s switch
@@ -40,11 +40,11 @@ public static class Ru
 
     public static string PayColor(PaymentStatus s) => s switch
     {
-        PaymentStatus.Paid => "#1E9E5A",
-        PaymentStatus.PartiallyPaid => "#D98A00",
-        PaymentStatus.Overpaid => "#7A4DE0",
-        PaymentStatus.Refunded => "#D13C3C",
-        _ => "#6B7385",
+        PaymentStatus.Paid => "#34D399",
+        PaymentStatus.PartiallyPaid => "#F5A524",
+        PaymentStatus.Overpaid => "#9B8AFB",
+        PaymentStatus.Refunded => "#F26D6D",
+        _ => "#8A929E",
     };
 
     public static string PayType(PaymentType t) => t switch

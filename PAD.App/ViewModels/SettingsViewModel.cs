@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using PAD.Data;
+using PAD.Desktop.Services;
 
 namespace PAD.Desktop.ViewModels;
 
@@ -21,6 +22,15 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string status = "";
     [ObservableProperty] private bool isError;
     [ObservableProperty] private string dbSize = "";
+
+    [ObservableProperty] private bool isDark = ProfileService.Current.Dark;
+
+    partial void OnIsDarkChanged(bool value)
+    {
+        ProfileService.Current.Dark = value;
+        ProfileService.Save();
+        ThemeService.Apply(value);
+    }
 
     public SettingsViewModel() => RefreshInfo();
 
@@ -54,7 +64,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         };
         if (dlg.ShowDialog() != true) return "Создание копии отменено.";
         var path = dlg.FileName;
-        await Task.Run(() => BackupService.CreateBackup(App.DbPath, path));
+        await Task.Run(() => BackupService.CreateBackup(App.DbPath, path, App.FilesDir));
         return "Копия создана: " + path + " (" + Size(new FileInfo(path).Length) + ")";
     });
 
@@ -70,8 +80,11 @@ public sealed partial class SettingsViewModel : ObservableObject
         if (ok != MessageBoxResult.Yes) return "Восстановление отменено.";
 
         var path = dlg.FileName;
-        var safety = await Task.Run(() => BackupService.Restore(path, App.DbPath));
+        var safety = await Task.Run(() => BackupService.Restore(path, App.DbPath, App.FilesDir));
         using (var db = App.CreateDb()) PadDatabase.Initialize(db);
+        ProfileService.Load();
+        ThemeService.Apply(ProfileService.Current.Dark);
+        IsDark = ProfileService.Current.Dark;
         return "Данные восстановлены. Прежние данные сохранены в: " + safety;
     });
 

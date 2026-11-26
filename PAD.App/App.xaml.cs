@@ -2,6 +2,7 @@ using System.IO;
 using System.Windows;
 using Microsoft.EntityFrameworkCore;
 using PAD.Data;
+using PAD.Desktop.Services;
 
 namespace PAD.Desktop;
 
@@ -10,6 +11,8 @@ public partial class App : Application
     static DbContextOptions<PadDbContext>? _options;
 
     public static string DbPath { get; private set; } = "";
+
+    public static string FilesDir => Path.Combine(Path.GetDirectoryName(DbPath)!, "files");
 
     public static PadDbContext CreateDb() => new(_options!);
 
@@ -33,7 +36,10 @@ public partial class App : Application
             return;
         }
 
-        try { BackupService.AutoBackup(DbPath, Path.Combine(Path.GetDirectoryName(DbPath)!, "backups")); }
+        try { ProfileService.Load(); ThemeService.Apply(ProfileService.Current.Dark); }
+        catch (Exception ex) { LogError(ex); }
+
+        try { BackupService.AutoBackup(DbPath, Path.Combine(Path.GetDirectoryName(DbPath)!, "backups"), filesDir: FilesDir); }
         catch (Exception ex) { LogError(ex); } // автокопия не должна мешать запуску
 
         new MainWindow().Show();

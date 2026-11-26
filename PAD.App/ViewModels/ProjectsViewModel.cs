@@ -48,7 +48,7 @@ public sealed partial class ProjectsViewModel : ObservableObject
     [ObservableProperty] private string detailName = "";
     [ObservableProperty] private string detailSub = "";
     [ObservableProperty] private string detailPay = "";
-    [ObservableProperty] private string detailPayColor = "#6B7385";
+    [ObservableProperty] private string detailPayColor = "#8A929E";
     [ObservableProperty] private Option<ProjectStatus>? selectedStatus;
     [ObservableProperty] private bool canDeliver;
     [ObservableProperty] private bool canReopen;
@@ -77,10 +77,13 @@ public sealed partial class ProjectsViewModel : ObservableObject
     bool _suppress;
 
     readonly int? _openId;
+    readonly bool _startCreate;
 
-    public ProjectsViewModel(int? openId = null)
+    public ProjectsViewModel(int? openId = null, string? search = null, bool create = false)
     {
         _openId = openId;
+        _startCreate = create;
+        if (!string.IsNullOrWhiteSpace(search)) searchText = search;
         payType = PaymentTypes[0];
         newStatus = StatusOptions.First(o => o.Value == ProjectStatus.InProgress);
         _ = InitAsync();
@@ -95,6 +98,7 @@ public sealed partial class ProjectsViewModel : ObservableObject
             NewCategory = Categories.FirstOrDefault();
             await LoadListAsync(_openId);
             if (_openId.HasValue) await LoadDetailAsync(_openId);
+            if (_startCreate) NewProject();
         });
     }
 
@@ -175,9 +179,9 @@ public sealed partial class ProjectsViewModel : ObservableObject
             CanReopen = r.Status is ProjectStatus.Delivered or ProjectStatus.Completed;
 
             DetailTiles.Clear();
-            DetailTiles.Add(Tile("Стоимость", r.Price, r.Currency, "", "#2F5BEA", "#E6EDFF"));
-            DetailTiles.Add(Tile("Получено", r.Received, r.Currency, "", "#1E9E5A", "#E3F5EA"));
-            DetailTiles.Add(Tile("Остаток к оплате", r.Remaining, r.Currency, "", "#D98A00", "#FCF0D9"));
+            DetailTiles.Add(Tile("Стоимость", r.Price, r.Currency, "", "#3B9EF0", ""));
+            DetailTiles.Add(Tile("Получено", r.Received, r.Currency, "", "#34D399", ""));
+            DetailTiles.Add(Tile("Остаток к оплате", r.Remaining, r.Currency, "", "#F5A524", ""));
             DetailTiles.Add(new StatTile("Дедлайн",
                 new[] { new MoneyLine(r.Deadline?.ToString("dd.MM.yyyy") ?? "не задан", "") }, "", "#7A4DE0", "#EEE8FC"));
 
@@ -270,7 +274,21 @@ public sealed partial class ProjectsViewModel : ObservableObject
     });
 
     static StatTile Tile(string label, decimal amount, string cur, string glyph, string accent, string tint) =>
-        new(label, new[] { new MoneyLine(Fmt(amount), cur) }, glyph, accent, tint);
+        new(label, new[] { new MoneyLine(Fmt(amount), cur) }, glyph, accent, UiFormat.Tint(accent));
+
+    [RelayCommand]
+    private Task ArchiveAsync() => Run(async () =>
+    {
+        if (!HasDetail) return;
+        var ok = System.Windows.MessageBox.Show(
+            "Проект «" + DetailName + "» переедет в архив. Платежи и заработок сохранятся, проект можно вернуть из раздела «Архив».",
+            "Отправить в архив", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
+        if (ok != System.Windows.MessageBoxResult.Yes) return;
+        using var db = App.CreateDb();
+        await ProjectService.SetArchivedAsync(db, _detailId, true);
+        HasDetail = false;
+        await LoadListAsync(null);
+    });
 
     static string Fmt(decimal v) => v.ToString("#,##0.##", CultureInfo.CurrentCulture);
 
