@@ -379,12 +379,12 @@ public sealed partial class ProjectsViewModel : ObservableObject
         await RefreshStagesAsync();
     });
 
-    static string StageColor(StageStatus s) => s switch
+    static string StageColor(PAD.Domain.StageStatus s) => s switch
     {
-        StageStatus.Done => "#34D399",
-        StageStatus.InProgress => "#3B9EF0",
-        StageStatus.InReview => "#22B8CF",
-        StageStatus.Paused => "#F5A524",
+        PAD.Domain.StageStatus.Done => "#34D399",
+        PAD.Domain.StageStatus.InProgress => "#3B9EF0",
+        PAD.Domain.StageStatus.InReview => "#22B8CF",
+        PAD.Domain.StageStatus.Paused => "#F5A524",
         _ => "#8A929E",
     };
 
