@@ -5,7 +5,7 @@
         <BooleanToVisibilityConverter x:Key="B2V"/>
     </UserControl.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="8,8,28,24" MaxWidth="900" HorizontalAlignment="Left">
+        <StackPanel Margin="24,24,32,24" MaxWidth="900" HorizontalAlignment="Left">
             <TextBlock Text="Архив" Style="{StaticResource PageTitle}"/>
             <TextBlock Text="Архивные проекты скрыты из списка, но их платежи по-прежнему входят в заработок." TextWrapping="Wrap"
                        Foreground="{DynamicResource TextMutedBrush}" Margin="0,2,0,16"/>

@@ -5,7 +5,7 @@
         <BooleanToVisibilityConverter x:Key="B2V"/>
     </UserControl.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="8,8,28,24" MaxWidth="820" HorizontalAlignment="Left">
+        <StackPanel Margin="24,24,32,24" MaxWidth="820" HorizontalAlignment="Left">
             <TextBlock Text="Мой профиль" Style="{StaticResource PageTitle}"/>
 
             <Border Style="{StaticResource Card}" Margin="0,16,0,0">
@@ -27,7 +27,7 @@
                                     Visibility="{Binding HasAvatar, Converter={StaticResource B2V}}">
                                 <TextBlock Text="Убрать аватарку"/>
                             </Button>
-                            <TextBlock Text="PNG, JPG или BMP. Файл копируется в папку данных PAD." FontSize="11.5"
+                            <TextBlock Text="PNG, JPG или BMP. Файл копируется в папку данных PAD." FontSize="11"
                                        Foreground="{DynamicResource TextMutedBrush}" Margin="0,8,0,0"/>
                         </StackPanel>
                     </StackPanel>
@@ -42,7 +42,7 @@
                     <TextBlock Text="Начало работы" Style="{StaticResource FieldLabel}"/>
                     <DatePicker SelectedDate="{Binding StartDate}" HorizontalAlignment="Left" Width="200"/>
 
-                    <StackPanel Orientation="Horizontal" Margin="0,18,0,0">
+                    <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
                         <Button Style="{StaticResource AccentButton}" Command="{Binding SaveCommand}">
                             <TextBlock Text="Сохранить" Foreground="{DynamicResource AccentTextBrush}" FontWeight="Medium"/>
                         </Button>

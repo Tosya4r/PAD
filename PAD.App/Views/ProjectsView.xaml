@@ -13,7 +13,7 @@
 
         <!-- Список проектов -->
         <DockPanel Margin="0,0,20,0">
-            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,14">
+            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,16">
                 <Button DockPanel.Dock="Right" Style="{StaticResource AccentButton}" Command="{Binding NewProjectCommand}"
                         VerticalAlignment="Center">
                     <TextBlock Text="+ Проект" Foreground="{DynamicResource AccentTextBrush}" FontWeight="Medium"/>
@@ -36,7 +36,7 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <Border Width="10" Height="10" CornerRadius="5" Background="{Binding CategoryColor}" VerticalAlignment="Center"/>
+                            <Border Width="10" Height="10" CornerRadius="12" Background="{Binding CategoryColor}" VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" Margin="8,0,8,0"
                                        TextTrimming="CharacterEllipsis"/>
                             <TextBlock Grid.Column="2" Text="{Binding PriceText}" FontSize="13" FontWeight="Medium"/>
@@ -64,7 +64,7 @@
 
                 <!-- Создание проекта -->
                 <Border Visibility="{Binding IsCreating, Converter={StaticResource B2V}}"
-                        Background="{DynamicResource SurfaceBrush}" CornerRadius="14" Padding="22">
+                        Background="{DynamicResource SurfaceBrush}" CornerRadius="16" Padding="22">
                     <StackPanel>
                         <TextBlock Text="Новый проект" FontSize="18" FontWeight="SemiBold"/>
                         <TextBlock Text="Название" Style="{StaticResource FieldLabel}"/>
@@ -96,7 +96,7 @@
                         <TextBlock Text="Описание" Style="{StaticResource FieldLabel}"/>
                         <TextBox Style="{StaticResource Input}" Height="80" AcceptsReturn="True" TextWrapping="Wrap"
                                  Text="{Binding NewDescription, UpdateSourceTrigger=PropertyChanged}"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,18,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
                             <Button Style="{StaticResource AccentButton}" Command="{Binding CreateProjectCommand}">
                                 <TextBlock Text="Создать проект" Foreground="{DynamicResource AccentTextBrush}" FontWeight="Medium"/>
                             </Button>
@@ -113,7 +113,7 @@
                         <StackPanel>
                             <TextBlock Text="{Binding DetailName}" FontSize="24" FontWeight="SemiBold" TextWrapping="Wrap"/>
                             <TextBlock Text="{Binding DetailSub}" Foreground="{DynamicResource TextMutedBrush}" Margin="0,4,0,0"/>
-                            <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                            <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
                                 <TextBlock Text="Статус проекта" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
                                 <ComboBox ItemsSource="{Binding StatusOptions}" DisplayMemberPath="Title"
                                           SelectedItem="{Binding SelectedStatus}" MinWidth="170"/>
@@ -123,13 +123,13 @@
                         </StackPanel>
                     </Border>
 
-                    <ItemsControl ItemsSource="{Binding DetailTiles}" ItemTemplate="{StaticResource MoneyTileTemplate}" Margin="0,14,0,0">
+                    <ItemsControl ItemsSource="{Binding DetailTiles}" ItemTemplate="{StaticResource MoneyTileTemplate}" Margin="0,16,0,0">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate><UniformGrid Rows="1"/></ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                     </ItemsControl>
 
-                    <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                    <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
                         <Button Style="{StaticResource AccentButton}" Command="{Binding OpenDeliveryCommand}"
                                 Visibility="{Binding CanDeliver, Converter={StaticResource B2V}}">
                             <TextBlock Text="Зафиксировать сдачу" Foreground="{DynamicResource AccentTextBrush}" FontWeight="Medium"/>
@@ -144,8 +144,8 @@
                     </StackPanel>
 
                     <!-- Сдача проекта -->
-                    <Border Visibility="{Binding IsDelivering, Converter={StaticResource B2V}}" Margin="0,14,0,0"
-                            Background="{DynamicResource SurfaceBrush}" CornerRadius="14" Padding="22">
+                    <Border Visibility="{Binding IsDelivering, Converter={StaticResource B2V}}" Margin="0,16,0,0"
+                            Background="{DynamicResource SurfaceBrush}" CornerRadius="16" Padding="22">
                         <StackPanel>
                             <TextBlock Text="Сдача проекта заказчику" FontSize="18" FontWeight="SemiBold"/>
                             <TextBlock Style="{StaticResource FieldLabel}" TextWrapping="Wrap"
@@ -167,7 +167,7 @@
                             <TextBlock Text="Комментарий" Style="{StaticResource FieldLabel}"/>
                             <TextBox Style="{StaticResource Input}" Height="60" AcceptsReturn="True" TextWrapping="Wrap"
                                      Text="{Binding DelivComment, UpdateSourceTrigger=PropertyChanged}"/>
-                            <StackPanel Orientation="Horizontal" Margin="0,18,0,0">
+                            <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
                                 <Button Style="{StaticResource AccentButton}" Command="{Binding ConfirmDeliveryCommand}">
                                     <TextBlock Text="Подтвердить сдачу" Foreground="{DynamicResource AccentTextBrush}" FontWeight="Medium"/>
                                 </Button>

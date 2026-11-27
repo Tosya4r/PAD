@@ -84,7 +84,7 @@ public sealed class BarChart : FrameworkElement
             if (slot >= 26 || i % 2 == 0)
             {
                 var ft = new FormattedText(b.Label, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-                    new Typeface("Segoe UI"), 11, selected || i == _hover ? Strong : Muted, dpi);
+                    new Typeface("Inter, Segoe UI"), 11, selected || i == _hover ? Strong : Muted, dpi);
                 dc.DrawText(ft, new Point(L + slot * i + (slot - ft.Width) / 2, T + h + 7));
             }
         }

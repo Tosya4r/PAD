@@ -7,7 +7,7 @@
         <conv:DateTextConverter x:Key="DateText"/>
     </UserControl.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="8,8,28,24" MaxWidth="900" HorizontalAlignment="Left">
+        <StackPanel Margin="24,24,32,24" MaxWidth="900" HorizontalAlignment="Left">
             <TextBlock Text="Задачи" Style="{StaticResource PageTitle}"/>
             <TextBlock Text="{Binding Error}" Foreground="{DynamicResource OverdueBrush}" TextWrapping="Wrap" Margin="0,6,0,0"/>
 
@@ -39,11 +39,11 @@
                 </StackPanel>
             </Border>
 
-            <Border Background="{DynamicResource HoverBrush}" CornerRadius="10" Padding="2" HorizontalAlignment="Left" Margin="0,18,0,10">
+            <Border Background="{DynamicResource HoverBrush}" CornerRadius="16" Padding="2" HorizontalAlignment="Left" Margin="0,18,0,10">
                 <ListBox ItemsSource="{Binding Filters}" SelectedItem="{Binding SelectedFilter}"
                          Background="Transparent" BorderThickness="0" ItemContainerStyle="{StaticResource Chip}">
                     <ListBox.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate></ListBox.ItemsPanel>
-                    <ListBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Title}" FontSize="12.5" FontWeight="Medium"/></DataTemplate></ListBox.ItemTemplate>
+                    <ListBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Title}" FontSize="12" FontWeight="Medium"/></DataTemplate></ListBox.ItemTemplate>
                 </ListBox>
             </Border>
 

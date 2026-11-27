@@ -5,7 +5,7 @@
         <BooleanToVisibilityConverter x:Key="B2V"/>
     </UserControl.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="8,8,28,24">
+        <StackPanel Margin="24,24,32,24">
             <TextBlock Text="Финансы" Style="{StaticResource PageTitle}"/>
             <TextBlock Text="Суммы разных валют не смешиваются — каждая считается отдельно." Foreground="{DynamicResource TextMutedBrush}" Margin="0,2,0,16"/>
             <TextBlock Text="{Binding Error}" Foreground="{DynamicResource OverdueBrush}" TextWrapping="Wrap"/>
@@ -14,7 +14,7 @@
                 <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Rows="1"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
             </ItemsControl>
 
-            <Grid Margin="0,18,0,0">
+            <Grid Margin="0,24,0,0">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
 
                 <Border Style="{StaticResource Card}" Margin="0,0,8,0">
@@ -31,14 +31,14 @@
                                         <StackPanel>
                                             <DockPanel>
                                                 <TextBlock DockPanel.Dock="Right" Text="{Binding Received}" FontWeight="SemiBold"/>
-                                                <Border DockPanel.Dock="Left" Width="10" Height="10" CornerRadius="5" Background="{Binding CategoryColor}" Margin="0,0,8,0"/>
+                                                <Border DockPanel.Dock="Left" Width="10" Height="10" CornerRadius="12" Background="{Binding CategoryColor}" Margin="0,0,8,0"/>
                                                 <TextBlock Text="{Binding Name}" FontWeight="Medium" TextTrimming="CharacterEllipsis"/>
                                             </DockPanel>
                                             <Grid Margin="0,6,0,0">
                                                 <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                                 <ProgressBar Value="{Binding Percent, Mode=OneWay}" Maximum="100" Height="5"
                                                              Foreground="{DynamicResource AccentBrush}" Background="{DynamicResource LineBrush}" BorderThickness="0"/>
-                                                <TextBlock Grid.Column="1" Text="{Binding Price}" FontSize="11.5" Margin="8,0,0,0" Foreground="{DynamicResource TextMutedBrush}"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding Price}" FontSize="11" Margin="8,0,0,0" Foreground="{DynamicResource TextMutedBrush}"/>
                                             </Grid>
                                         </StackPanel>
                                     </Button>
@@ -62,11 +62,11 @@
                                         <DockPanel>
                                             <StackPanel DockPanel.Dock="Right" HorizontalAlignment="Right">
                                                 <TextBlock Text="{Binding Amount}" FontWeight="SemiBold" TextAlignment="Right"/>
-                                                <TextBlock Text="{Binding StatusText}" FontSize="11.5" Foreground="{Binding Color}" TextAlignment="Right"/>
+                                                <TextBlock Text="{Binding StatusText}" FontSize="11" Foreground="{Binding Color}" TextAlignment="Right"/>
                                             </StackPanel>
                                             <StackPanel>
                                                 <TextBlock Text="{Binding Project}" FontWeight="Medium" TextTrimming="CharacterEllipsis"/>
-                                                <TextBlock FontSize="11.5" Foreground="{DynamicResource TextMutedBrush}" TextTrimming="CharacterEllipsis">
+                                                <TextBlock FontSize="11" Foreground="{DynamicResource TextMutedBrush}" TextTrimming="CharacterEllipsis">
                                                     <Run Text="{Binding Client, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding DueText, Mode=OneWay}"/>
                                                 </TextBlock>
                                             </StackPanel>
